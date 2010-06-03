@@ -3,5 +3,6 @@
 
 CFLAGS=-g -Wall
 LDFLAGS=-lgmp
+OBJS=bnbf.c options.c
 
-bnbf: bnbf.c
+bnbf: $(OBJS)
