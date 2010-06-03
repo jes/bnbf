@@ -3,6 +3,9 @@
 
 CFLAGS=-g -Wall
 LDFLAGS=-lgmp
-OBJS=bnbf.c options.c
+OBJS=bnbf.o options.o program.o memory.o
 
 bnbf: $(OBJS)
+
+clean:
+	-rm bnbf $(OBJS)

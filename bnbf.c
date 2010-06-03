@@ -10,14 +10,14 @@ int main(int argc, char **argv) {
   argp_parse(&argp, argc, argv, 0, 0, NULL);
 
   /* No inputs? Use stdin */
-  if(num_inputs == 0) {
-    input = malloc(sizeof(char *));
-    *input = "-";
-    num_inputs = 1;
+  if(num_files == 0) {
+    file = malloc(sizeof(char *));
+    *file = "-";
+    num_files = 1;
   }
 
-  for(i = 0; i < num_inputs; i++) {
-    /* run_program(input[i]); */
+  for(i = 0; i < num_files; i++) {
+    run_program(file[i]);
   }
 
   return 0;

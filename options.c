@@ -25,14 +25,13 @@ struct argp argp = { options, parse_option, args_doc, doc };
 /* command line options */
 int chario = 0;
 int wrap = 0;
-char **input;
-int num_inputs = 0;
+char **file;
+int num_files = 0;
 
 /* Parse a single option for argp_parse */
 static error_t parse_option(int key, char *arg, struct argp_state *state) {
   switch(key) {
   case 'c':
-    fprintf(stderr, "Chario unimplemented.\n");
     chario = 1;
     break;
   case 'w':
@@ -40,8 +39,8 @@ static error_t parse_option(int key, char *arg, struct argp_state *state) {
     wrap = 1;
     break;
   case ARGP_KEY_ARG:
-    input = realloc(input, sizeof(char *) * ++num_inputs);
-    input[num_inputs - 1] = arg;
+    file = realloc(file, sizeof(char *) * ++num_files);
+    file[num_files - 1] = arg;
     break;
   default:
     return ARGP_ERR_UNKNOWN;
