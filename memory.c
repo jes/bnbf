@@ -74,6 +74,16 @@ void add(Memory *mem, int amt) {
 
 /* Read input to the current cell */
 void input(Memory *mem) {
+  mpz_t *cell;
+
+  cell = get_cell(mem);
+
+  if(chario) {
+    /* character io */
+  } else {
+    /* number io */
+    mpz_inp_str(*cell, stdin, 10);
+  }
 }
 
 /* Write output from the current cell */

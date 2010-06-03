@@ -16,7 +16,7 @@ static const char args_doc[] = "FILES";
 
 static const struct argp_option options[] = {
   { "char-io", 'c', 0, 0, "Use character I/O instead of numbers" },
-  { "wrap", 'w', 0, 0, "Wrap memory as if it consisted of unsigned bytes" },
+  { "wrap", 'w', 0, 0, "Wrap values as if they were unsigned bytes" },
   { NULL }
 };
 
