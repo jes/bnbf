@@ -80,6 +80,7 @@ void input(Memory *mem) {
 
   if(chario) {
     /* character io */
+    mpz_set_ui(*cell, fgetc(stdin));
   } else {
     /* number io */
     mpz_inp_str(*cell, stdin, 10);

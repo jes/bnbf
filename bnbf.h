@@ -11,6 +11,7 @@
 /* options.c */
 extern struct argp argp;
 extern int chario;
+extern int maxmem;
 extern int wrap;
 extern char **file;
 extern int num_files;
