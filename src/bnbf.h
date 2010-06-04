@@ -6,8 +6,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 #include <stdio.h>
-#include <argp.h>
 #include <gmp.h>
 
 #include "config.h"
@@ -20,8 +20,8 @@ extern char *eof_value;
 extern int maxmem;
 extern int noneg;
 extern int wrap;
-extern char **file;
-extern int num_files;
+
+void parse_options(int argc, char **argv);
 
 /* program.c */
 typedef struct Inst {

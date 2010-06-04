@@ -6,36 +6,6 @@
 
 #include "bnbf.h"
 
-static error_t parse_option(int key, char *arg, struct argp_state *state);
-
-const char *argp_program_version = VERSION;
-const char *argp_program_bug_address = MAINTAINER;
-
-static const char doc[] =
-  VERSION " - a brainfuck interpreter with bignum memory";
-
-static const char args_doc[] = "FILE...";
-
-/* NOTE: Remember to update the man page */
-static const struct argp_option options[] = {
-  { "benchmark", 'b', 0, 0,
-    "Print benchmarking information after program termination" },
-  { "char-io", 'c', 0, 0,
-    "Use character I/O instead of numbers" },
-  { "eof", 'e', "value", 0,
-    "Set the value to use when EOF is encountered on input (default: "
-    "\"nochange\")" },
-  { "max-mem", 'm', "address", 0,
-    "Set limit on highest valid memory address" },
-  { "no-negative", 'n', 0, 0,
-    "Prevent negative addresses from being used" },
-  { "wrap", 'w', 0, 0,
-    "Wrap values as if they were unsigned bytes" },
-  { NULL }
-};
-
-struct argp argp = { options, parse_option, args_doc, doc };
-
 /* command line options */
 int benchmark = 0;
 int chario = 0;
@@ -43,37 +13,98 @@ char *eof_value = "nochange";
 int maxmem = 0;
 int noneg = 0;
 int wrap = 0;
-char **file;
-int num_files = 0;
 
-/* Parse a single option for argp_parse */
-static error_t parse_option(int key, char *arg, struct argp_state *state) {
-  switch(key) {
-  case 'b':
-    benchmark = 1;
-    break;
-  case 'c':
-    chario = 1;
-    break;
-  case 'e':
-    eof_value = arg;
-    break;
-  case 'm':
-    maxmem = atoi(arg);
-    break;
-  case 'n':
-    noneg = 1;
-    break;
-  case 'w':
-    wrap = 1;
-    break;
-  case ARGP_KEY_ARG:
-    file = realloc(file, sizeof(char *) * ++num_files);
-    file[num_files - 1] = arg;
-    break;
-  default:
-    return ARGP_ERR_UNKNOWN;
+static struct option long_options[] = {
+  { "benchmark", 0, NULL, 'b' },
+  { "char-io", 0, NULL, 'c' },
+  { "eof", 1, NULL, 'e' },
+  { "help", 0, NULL, 'h' },
+  { "max-mem", 1, NULL, 'm' },
+  { "no-negative", 0, NULL, 'n' },
+  { "usage", 0, NULL, 'U' },
+  { "version", 0, NULL, 'V' },
+  { "wrap", 0, NULL, 'w' },
+  { NULL }
+};
+
+/* Output for --help */
+static void help(void) {
+  puts(
+  "Usage: bnbf [OPTION...] FILE...\n"
+  VERSION " - a brainfuck interpreter with bignum memory\n"
+  "\n"
+  "  -b, --benchmark         Print benchmarking information after program\n"
+  "                          termination\n"
+  "  -c, --char-io           Use character I/O instead of numbers\n"
+  "  -e, --eof=value         Set the value to use when EOF is encountered on\n"
+  "                          input (default: \"nochange\")\n"
+  "  -m, --max-mem=address   Set limit on highest valid memory address\n"
+  "  -n, --no-negative       Prevent negative memory address from being used\n"
+  "  -w, --wrap              Wrap cell values as if they were unsigned bytes\n"
+  "  -h, --help              Give this help list\n"
+  "      --usage             Give a short usage message\n"
+  "  -V, --version           Print program version\n"
+  "\n"
+  "Report bugs to " MAINTAINER ".");
+
+  exit(0);
+}
+
+/* Output for --version */
+static void version(void) {
+  puts(VERSION);
+
+  exit(0);
+}
+
+/* Output for --usage */
+static void usage(void) {
+  puts(
+  "Usage: bnbf [-bchnwV] [-e value] [-m address] [--benchmark] [--char-io]\n"
+  "            [--eof=value] [--max-mem=address] [--no-negative] [--wrap]\n"
+  "            [--help] [--usage] [--version] FILE...");
+
+  exit(0);
+}
+
+/* Parses the program options using getopt_long() */
+void parse_options(int argc, char **argv) {
+  int c;
+  int option_index = 0;
+
+  while((c = getopt_long(argc, argv, "bce:hm:nVw", long_options,
+                         &option_index)) != -1) {
+    switch(c) {
+    case 'b':
+      benchmark = 1;
+      break;
+    case 'c':
+      chario = 1;
+      break;
+    case 'e':
+      eof_value = optarg;
+      break;
+    case 'h':
+      help();
+      break;
+    case 'm':
+      maxmem = atoi(optarg);
+      break;
+    case 'n':
+      noneg = 1;
+      break;
+    case 'U':
+      usage();
+      break;
+    case 'V':
+      version();
+      break;
+    case 'w':
+      wrap = 1;
+      break;
+    case '?':
+      exit(1);
+      break;
+    }
   }
-
-  return 0;
 }

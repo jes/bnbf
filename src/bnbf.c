@@ -7,20 +7,12 @@
 #include "bnbf.h"
 
 int main(int argc, char **argv) {
-  int i;
+  parse_options(argc, argv);
 
-  argp_parse(&argp, argc, argv, 0, 0, NULL);
+  /* No input files? Use stdin */
+  if(optind >= argc) run_program("-");
 
-  /* No inputs? Use stdin */
-  if(num_files == 0) {
-    file = malloc(sizeof(char *));
-    *file = "-";
-    num_files = 1;
-  }
-
-  for(i = 0; i < num_files; i++) {
-    run_program(file[i]);
-  }
+  while(optind < argc) run_program(argv[optind++]);
 
   return 0;
 }
