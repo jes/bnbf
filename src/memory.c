@@ -118,9 +118,10 @@ void input(Memory *mem) {
         }
       }
     } while(n == 0);
+
+    mpz_clear(input);
   }
 
-  mpz_clear(input);
   return;
 
  handle_eof:
