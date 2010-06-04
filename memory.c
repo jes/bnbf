@@ -91,24 +91,41 @@ void add(Memory *mem, int amt) {
 /* Read input to the current cell */
 void input(Memory *mem) {
   mpz_t *cell;
+  mpz_t input;
   size_t n;
+  int c;
 
   cell = get_cell(mem);
 
   if(chario) {
     /* character io */
     fflush(stdout);
-    mpz_set_ui(*cell, fgetc(stdin));
+    c = fgetc(stdin);
+    if(c == EOF) goto handle_eof;
+    else mpz_set_ui(*cell, c);
   } else {
     /* number io */
+    mpz_init(input);
+
     do {
       fprintf(stderr, "Input: ");
       fflush(stderr);
-      n = mpz_inp_str(*cell, stdin, 0);
-    } while(n == 0);
 
-    /* TODO: sort out errors (*/
-    while(!mpz_inp_str(*cell, stdin, 0));
+      if((n = mpz_inp_str(input, stdin, 0)) == 0) {
+        if(feof(stdin)) {
+          mpz_clear(input);
+          goto handle_eof;
+        }
+      }
+    } while(n == 0);
+  }
+
+  mpz_clear(input);
+  return;
+
+ handle_eof:
+  if(strcasecmp(eof_value, "nochange") != 0) {
+    mpz_set_str(*cell, eof_value, 0);
   }
 }
 

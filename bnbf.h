@@ -16,6 +16,7 @@
 extern struct argp argp;
 extern int benchmark;
 extern int chario;
+extern char *eof_value;
 extern int maxmem;
 extern int wrap;
 extern char **file;

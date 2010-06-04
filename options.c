@@ -21,6 +21,9 @@ static const struct argp_option options[] = {
     "Print benchmarking information after program termination" },
   { "char-io", 'c', 0, 0,
     "Use character I/O instead of numbers" },
+  { "eof", 'e', "value", 0,
+    "Set the value to use when EOF is encountered on input (default: "
+    "\"nochange\")" },
   { "max-mem", 'm', "address", 0,
     "Set limit on highest valid memory address" },
   { "wrap", 'w', 0, 0,
@@ -33,6 +36,7 @@ struct argp argp = { options, parse_option, args_doc, doc };
 /* command line options */
 int benchmark = 0;
 int chario = 0;
+char *eof_value = "nochange";
 int maxmem = 0;
 int wrap = 0;
 char **file;
@@ -46,6 +50,9 @@ static error_t parse_option(int key, char *arg, struct argp_state *state) {
     break;
   case 'c':
     chario = 1;
+    break;
+  case 'e':
+    eof_value = arg;
     break;
   case 'm':
     maxmem = atoi(arg);
