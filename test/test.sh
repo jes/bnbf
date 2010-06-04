@@ -10,7 +10,7 @@ do
 
     ../../src/bnbf `cat options` program >real-stdout 2>real-stderr <stdin
 
-    cmp --silent real-stderr stderr
+    cmp -s real-stderr stderr
     if [ "$?" -ne "0" ]
     then
         echo "FAIL"
@@ -19,7 +19,7 @@ do
         echo "Got:"
         cat real-stderr
      else
-        cmp --silent real-stdout stdout
+        cmp -s real-stdout stdout
         if [ "$?" -ne "0" ]
         then
             echo "FAIL"
