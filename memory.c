@@ -76,10 +76,14 @@ void add(Memory *mem, int amt) {
 
   if(!(cell = get_cell(mem))) return;
 
-  /* TODO: Handle wrapping if enabled */
-
   if(amt > 0) mpz_add_ui(*cell, *cell, amt);
   else mpz_sub_ui(*cell, *cell, -amt);
+
+  /* pretend we have 8-bit cells */
+  if(wrap) {
+    while(mpz_cmp_ui(*cell, 0) < 0) mpz_add_ui(*cell, *cell, 0x100);
+    while(mpz_cmp_ui(*cell, 0xff) > 0) mpz_sub_ui(*cell, *cell, 0x100);
+  }
 }
 
 /* Read input to the current cell */

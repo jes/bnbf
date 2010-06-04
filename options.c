@@ -49,7 +49,6 @@ static error_t parse_option(int key, char *arg, struct argp_state *state) {
     maxmem = atoi(arg);
     break;
   case 'w':
-    fprintf(stderr, "Wrapping cell values is unimplemented.\n");
     wrap = 1;
     break;
   case ARGP_KEY_ARG:
