@@ -8,4 +8,4 @@ OBJS=src/bnbf.o src/options.o src/program.o src/memory.o
 src/bnbf: $(OBJS)
 
 clean:
-	-rm src/bnbf $(OBJS) *~
+	-rm -f src/bnbf $(OBJS) *~
