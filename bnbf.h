@@ -10,6 +10,7 @@
 
 /* options.c */
 extern struct argp argp;
+extern int benchmark;
 extern int chario;
 extern int maxmem;
 extern int wrap;
@@ -22,6 +23,9 @@ typedef struct Inst {
   struct Inst *loop;/* address of corresponding loop entry/exit */
   struct Inst *next;/* next instruction to execute */
 } Inst;
+
+extern const char *program_name;
+extern int stop_program;
 
 void run_program(const char *name);
 void free_program(Inst *prog);

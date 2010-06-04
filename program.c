@@ -4,6 +4,9 @@
 
 #include "bnbf.h"
 
+const char *program_name;
+int stop_program;
+
 static void **stack;
 static int sp = 0;
 
@@ -32,6 +35,11 @@ void run_program(const char *name) {
   int c;
   char *instructions = "+-<>[],.";
   Memory *mem;
+
+  /* benchmarking counters */
+  int steps = 0;
+  int high_mp = 0;
+  int low_mp = 0;
 
   /* Open the program for reading */
   if(strcmp(name, "-") == 0) {
@@ -96,8 +104,14 @@ void run_program(const char *name) {
   /* get some memory */
   mem = make_memory();
 
+  /* set up globals */
+  stop_program = 0;
+  program_name = name;
+
   inst = program;
-  while(inst->type != '!') {
+  while(inst->type != '!' && !stop_program) {
+    steps++;
+
     switch(inst->type) {
     case '+':
       add(mem, 1);
@@ -107,9 +121,11 @@ void run_program(const char *name) {
       break;
     case '>':
       mem->mp++;
+      if(mem->mp > high_mp) high_mp = mem->mp;
       break;
     case '<':
       mem->mp--;
+      if(mem->mp < low_mp) low_mp = mem->mp;
       break;
     case ',':
       input(mem);
@@ -126,6 +142,13 @@ void run_program(const char *name) {
     }
 
     inst = inst->next;
+  }
+
+  /* benchmarking information */
+  if(benchmark) {
+    fprintf(stderr, "%s: execution steps used: %d\n", program_name, steps);
+    fprintf(stderr, "%s: high address visited: %d\n", program_name, high_mp);
+    fprintf(stderr, "%s:  low address visited: %d\n", program_name, low_mp);
   }
 
   free_program(program);

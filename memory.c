@@ -49,9 +49,19 @@ static mpz_t *get_cell(Memory *memory) {
     mp = -memory->mp;
   }
 
+  /* check that mp is within range */
+  if(maxmem && mp > maxmem) {
+    fprintf(stderr, "%s: memory overflow, perhaps you need to adjust the "
+            "--max-mem option or fix a memory leak in your program.\n",
+            program_name);
+    stop_program = 1;
+    return NULL;
+  }
+
   /* double the size of memory until we are within range */
   while(mp >= *len) {
     *len *= 2;
+
     *mem = realloc(*mem, *len * sizeof(mpz_t));
 
     for(i = *len / 2; i < *len; i++) mpz_init((*mem)[i]);
@@ -64,7 +74,7 @@ static mpz_t *get_cell(Memory *memory) {
 void add(Memory *mem, int amt) {
   mpz_t *cell;
 
-  cell = get_cell(mem);
+  if(!(cell = get_cell(mem))) return;
 
   /* TODO: Handle wrapping if enabled */
 
@@ -75,6 +85,7 @@ void add(Memory *mem, int amt) {
 /* Read input to the current cell */
 void input(Memory *mem) {
   mpz_t *cell;
+  size_t n;
 
   cell = get_cell(mem);
 
@@ -83,7 +94,13 @@ void input(Memory *mem) {
     mpz_set_ui(*cell, fgetc(stdin));
   } else {
     /* number io */
-    mpz_inp_str(*cell, stdin, 10);
+    do {
+      printf("Input: ");
+      n = mpz_inp_str(*cell, stdin, 0);
+    } while(n == 0);
+
+    /* TODO: sort out errors (*/
+    while(!mpz_inp_str(*cell, stdin, 0));
   }
 }
 

@@ -15,15 +15,21 @@ static const char doc[] =
 static const char args_doc[] = "FILES";
 
 static const struct argp_option options[] = {
-  { "char-io", 'c', 0, 0, "Use character I/O instead of numbers" },
-  { "max-mem", 'm', "address", 0, "Set limit on highest valid memory address" },
-  { "wrap", 'w', 0, 0, "Wrap values as if they were unsigned bytes" },
+  { "benchmark", 'b', 0, 0,
+    "Print benchmarking information after program termination" },
+  { "char-io", 'c', 0, 0,
+    "Use character I/O instead of numbers" },
+  { "max-mem", 'm', "address", 0,
+    "Set limit on highest valid memory address" },
+  { "wrap", 'w', 0, 0,
+    "Wrap values as if they were unsigned bytes" },
   { NULL }
 };
 
 struct argp argp = { options, parse_option, args_doc, doc };
 
 /* command line options */
+int benchmark = 0;
 int chario = 0;
 int maxmem = 0;
 int wrap = 0;
@@ -33,6 +39,9 @@ int num_files = 0;
 /* Parse a single option for argp_parse */
 static error_t parse_option(int key, char *arg, struct argp_state *state) {
   switch(key) {
+  case 'b':
+    benchmark = 1;
+    break;
   case 'c':
     chario = 1;
     break;
@@ -40,7 +49,7 @@ static error_t parse_option(int key, char *arg, struct argp_state *state) {
     maxmem = atoi(arg);
     break;
   case 'w':
-    fprintf(stderr, "Wrapping unimplemented.\n");
+    fprintf(stderr, "Wrapping cell values is unimplemented.\n");
     wrap = 1;
     break;
   case ARGP_KEY_ARG:
