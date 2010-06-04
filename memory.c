@@ -95,11 +95,13 @@ void input(Memory *mem) {
 
   if(chario) {
     /* character io */
+    fflush(stdout);
     mpz_set_ui(*cell, fgetc(stdin));
   } else {
     /* number io */
     do {
-      printf("Input: ");
+      fprintf(stderr, "Input: ");
+      fflush(stderr);
       n = mpz_inp_str(*cell, stdin, 0);
     } while(n == 0);
 
