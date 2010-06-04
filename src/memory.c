@@ -46,6 +46,15 @@ static mpz_t *get_cell(Memory *memory) {
     mem = &(memory->pos_mem);
     mp = memory->mp;
   } else {
+    if(noneg) {
+      fprintf(stderr, "%s: memory overflow, perhaps you need to stop using "
+              "the --no-negative option or fix a memory leak in your "
+              "program.\n",
+              program_name);
+      stop_program = 1;
+      return NULL;
+    }
+
     len = &(memory->neg_len);
     mem = &(memory->neg_mem);
     mp = -memory->mp;
@@ -95,7 +104,7 @@ void input(Memory *mem) {
   size_t n;
   int c;
 
-  cell = get_cell(mem);
+  if(!(cell = get_cell(mem))) return;
 
   if(chario) {
     /* character io */
@@ -134,7 +143,7 @@ void input(Memory *mem) {
 void output(Memory *mem) {
   mpz_t *cell;
 
-  cell = get_cell(mem);
+  if(!(cell = get_cell(mem))) return;
 
   if(chario) {
     /* character io */

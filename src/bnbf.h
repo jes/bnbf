@@ -18,6 +18,7 @@ extern int benchmark;
 extern int chario;
 extern char *eof_value;
 extern int maxmem;
+extern int noneg;
 extern int wrap;
 extern char **file;
 extern int num_files;

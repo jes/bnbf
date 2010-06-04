@@ -14,7 +14,7 @@ const char *argp_program_bug_address = MAINTAINER;
 static const char doc[] =
   VERSION " - a brainfuck interpreter with bignum memory";
 
-static const char args_doc[] = "FILES";
+static const char args_doc[] = "FILE...";
 
 static const struct argp_option options[] = {
   { "benchmark", 'b', 0, 0,
@@ -26,6 +26,8 @@ static const struct argp_option options[] = {
     "\"nochange\")" },
   { "max-mem", 'm', "address", 0,
     "Set limit on highest valid memory address" },
+  { "no-negative", 'n', 0, 0,
+    "Prevent negative addresses from being used" },
   { "wrap", 'w', 0, 0,
     "Wrap values as if they were unsigned bytes" },
   { NULL }
@@ -38,6 +40,7 @@ int benchmark = 0;
 int chario = 0;
 char *eof_value = "nochange";
 int maxmem = 0;
+int noneg = 0;
 int wrap = 0;
 char **file;
 int num_files = 0;
@@ -56,6 +59,9 @@ static error_t parse_option(int key, char *arg, struct argp_state *state) {
     break;
   case 'm':
     maxmem = atoi(arg);
+    break;
+  case 'n':
+    noneg = 1;
     break;
   case 'w':
     wrap = 1;
