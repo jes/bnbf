@@ -1,5 +1,7 @@
 /* Program stuff for bnbf
 
+   See "COPYING" for license details
+
    James Stanley 2010 */
 
 #include "bnbf.h"

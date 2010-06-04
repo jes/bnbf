@@ -1,4 +1,8 @@
-/* Header for bnbf */
+/* Header for bnbf
+
+   See "COPYING" for license details
+
+   James Stanley 2010 */
 
 #include <stdlib.h>
 #include <string.h>
