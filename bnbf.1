@@ -1,0 +1,39 @@
+.TH BNBF 1 "June 2010"
+.SH NAME
+bnbf \- Bignum brainfuck interpreter with various runtime options
+.SH SYNOPSIS
+\fBbnbf\fP [-bcnw?V] [-e value] [-m address] [--benchmark] [--char-io] [--eof=value] [--max-mem=address] [--no-negative] [--wrap] [--help] [--usage] [--version] FILE...
+.SS Options
+.TP
+\fB-b, --benchmark\fP
+Print benchmarking information after program termination.
+.TP
+\fB-c, --char-io\fP
+Use character I/O instead of numbers.
+.TP
+\fB-e, --eof=value\fP
+Set the value to use when EOF is encountered on input (default: "nochange").
+.TP
+\fB-m, --max-mem=address\fP
+Set limit on highest valid memory address.
+.TP
+\fB-n, --no-negative\fP
+Prevent negative addresses from being used.
+.TP
+\fB-w, --wrap\fP
+Wrap values as if they were unsigned bytes.
+.TP
+\fB-?, --help\fP
+Give this help list.
+.TP
+\fB--usage\fP
+Give a short usage message.
+.TP
+\fB-V, --version\fP
+Print program version.
+.SH EXAMPLES
+.TP
+\fBbnbf --char-io --eof=0 --wrap --max-mem=30000 --no-negative\fP
+Will emulate the behaviour of more "normal" brainfuck interpreters by using characters for I/O (instead of the default of numbers), setting cells to 0 when end-of-file is encountered on input, wrapping cells as if they were only one byte (though bignum is still used internally, so there is no performance advantage to using --wrap), and preventing the program from using addresses higher than 30000, or using negative memory addresses.
+.SH BUGS
+Report bugs to James Stanley <james@incoherency.co.uk>

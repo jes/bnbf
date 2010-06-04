@@ -16,6 +16,7 @@ static const char doc[] =
 
 static const char args_doc[] = "FILE...";
 
+/* NOTE: Remember to update the man page */
 static const struct argp_option options[] = {
   { "benchmark", 'b', 0, 0,
     "Print benchmarking information after program termination" },

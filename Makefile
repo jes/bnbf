@@ -14,4 +14,9 @@ clean:
 
 install:
 	install -m 0755 src/bnbf $(DESTDIR)$(PREFIX)/bin
+	install -m 0644 bnbf.1 $(DESTDIR)$(PREFIX)/share/man/man1
 .PHONY: install
+
+test:
+	cd test; ./test.sh
+.PHONY: test
