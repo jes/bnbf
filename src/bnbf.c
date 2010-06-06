@@ -11,8 +11,7 @@ int main(int argc, char **argv) {
 
   /* No input files? Use stdin */
   if(optind >= argc) run_program("-");
-
-  while(optind < argc) run_program(argv[optind++]);
+  else while(optind < argc) run_program(argv[optind++]);
 
   return 0;
 }

@@ -12,6 +12,7 @@ int chario = 0;
 char *eof_value = "nochange";
 int maxmem = 0;
 int noneg = 0;
+int prompt = 0;
 int wrap = 0;
 
 static struct option long_options[] = {
@@ -21,6 +22,7 @@ static struct option long_options[] = {
   { "help", 0, NULL, 'h' },
   { "max-mem", 1, NULL, 'm' },
   { "no-negative", 0, NULL, 'n' },
+  { "prompt", 0, NULL, 'p' },
   { "usage", 0, NULL, 'U' },
   { "version", 0, NULL, 'V' },
   { "wrap", 0, NULL, 'w' },
@@ -40,6 +42,7 @@ static void help(void) {
   "                          input (default: \"nochange\")\n"
   "  -m, --max-mem=address   Set limit on highest valid memory address\n"
   "  -n, --no-negative       Prevent negative memory address from being used\n"
+  "  -p, --prompt            Print a prompt when waiting for number input\n"
   "  -w, --wrap              Wrap cell values as if they were unsigned bytes\n"
   "  -h, --help              Give this help list\n"
   "      --usage             Give a short usage message\n"
@@ -60,9 +63,9 @@ static void version(void) {
 /* Output for --usage */
 static void usage(void) {
   puts(
-  "Usage: bnbf [-bchnwV] [-e value] [-m address] [--benchmark] [--char-io]\n"
-  "            [--eof=value] [--max-mem=address] [--no-negative] [--wrap]\n"
-  "            [--help] [--usage] [--version] FILE...");
+  "Usage: bnbf [-bchnpwV] [-e value] [-m address] [--benchmark] [--char-io]\n"
+  "            [--eof=value] [--max-mem=address] [--no-negative] [--prompt]\n"
+  "            [--wrap] [--help] [--usage] [--version] FILE...");
 
   exit(0);
 }
@@ -72,7 +75,7 @@ void parse_options(int argc, char **argv) {
   int c;
   int option_index = 0;
 
-  while((c = getopt_long(argc, argv, "bce:hm:nVw", long_options,
+  while((c = getopt_long(argc, argv, "bce:hm:npVw", long_options,
                          &option_index)) != -1) {
     switch(c) {
     case 'b':
@@ -92,6 +95,9 @@ void parse_options(int argc, char **argv) {
       break;
     case 'n':
       noneg = 1;
+      break;
+    case 'p':
+      prompt = 1;
       break;
     case 'U':
       usage();

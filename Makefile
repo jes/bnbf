@@ -4,7 +4,7 @@
 CFLAGS=-g -Wall
 LDFLAGS=-lgmp
 PREFIX?=/usr
-OBJS=src/bnbf.o src/options.o src/program.o src/memory.o
+OBJS=src/bnbf.o src/options.o src/program.o src/memory.o src/bigint.o
 
 src/bnbf: $(OBJS)
 

@@ -14,13 +14,13 @@ Memory *make_memory(void) {
   mem = malloc(sizeof(Memory));
   mem->mp = 0;
 
-  mem->pos_mem = malloc(INIT_MEM_SIZE * sizeof(mpz_t));
+  mem->pos_mem = malloc(INIT_MEM_SIZE * sizeof(bigint));
   mem->pos_len = INIT_MEM_SIZE;
-  for(i = 0; i < mem->pos_len; i++) mpz_init(mem->pos_mem[i]);
+  for(i = 0; i < mem->pos_len; i++) bigint_init(mem->pos_mem + i);
 
-  mem->neg_mem = malloc(INIT_MEM_SIZE * sizeof(mpz_t));
+  mem->neg_mem = malloc(INIT_MEM_SIZE * sizeof(bigint));
   mem->neg_len = INIT_MEM_SIZE;
-  for(i = 0; i < mem->neg_len; i++) mpz_init(mem->neg_mem[i]);
+  for(i = 0; i < mem->neg_len; i++) bigint_init(mem->neg_mem + i);
 
   return mem;
 }
@@ -34,10 +34,10 @@ void free_memory(Memory *mem) {
 
 /* Returns a pointer to the current cell of memory in mem. Sorts out the
    growing of memory where necessary */
-static mpz_t *get_cell(Memory *memory) {
+static bigint *get_cell(Memory *memory) {
   int i;
   int *len;
-  mpz_t **mem;
+  bigint **mem;
   int mp;
 
   /* positive or negative address? */
@@ -73,9 +73,9 @@ static mpz_t *get_cell(Memory *memory) {
   while(mp >= *len) {
     *len *= 2;
 
-    *mem = realloc(*mem, *len * sizeof(mpz_t));
+    *mem = realloc(*mem, *len * sizeof(bigint));
 
-    for(i = *len / 2; i < *len; i++) mpz_init((*mem)[i]);
+    for(i = *len / 2; i < *len; i++) bigint_init(*mem + i);
   }
 
   return *mem + mp;
@@ -83,26 +83,34 @@ static mpz_t *get_cell(Memory *memory) {
 
 /* Adds the given amount to the current cell of memory */
 void add(Memory *mem, int amt) {
-  mpz_t *cell;
+  bigint *cell;
+  bigint zero, ff;
 
   if(!(cell = get_cell(mem))) return;
 
-  if(amt > 0) mpz_add_ui(*cell, *cell, amt);
-  else mpz_sub_ui(*cell, *cell, -amt);
+  bigint_add_by_int(cell, amt);
 
   /* pretend we have 8-bit cells */
   if(wrap) {
-    while(mpz_cmp_ui(*cell, 0) < 0) mpz_add_ui(*cell, *cell, 0x100);
-    while(mpz_cmp_ui(*cell, 0xff) > 0) mpz_sub_ui(*cell, *cell, 0x100);
+    bigint_init(&zero); bigint_init(&ff);
+    bigint_add_by_int(&ff, 0xff);
+
+    while(bigint_compare(cell, &zero) < 0)
+      bigint_add_by_int(cell, 0x100);
+
+    while(bigint_compare(cell, &ff) > 0)
+      bigint_sub_by_int(cell, 0x100);
+
+    bigint_release(&zero); bigint_release(&ff);
   }
 }
 
 /* Read input to the current cell */
 void input(Memory *mem) {
-  mpz_t *cell;
-  mpz_t input;
-  size_t n;
+  bigint *cell;
   int c;
+  char buf[1024];
+  char *p;
 
   if(!(cell = get_cell(mem))) return;
 
@@ -110,56 +118,59 @@ void input(Memory *mem) {
     /* character io */
     fflush(stdout);
     c = fgetc(stdin);
+
     if(c == EOF) goto handle_eof;
-    else mpz_set_ui(*cell, c);
+    else bigint_from_int(cell, c);
   } else {
     /* number io */
-    mpz_init(input);
-
     do {
-      fprintf(stderr, "Input: ");
-      fflush(stderr);
-
-      if((n = mpz_inp_str(input, stdin, 0)) == 0) {
-        if(feof(stdin)) {
-          mpz_clear(input);
-          goto handle_eof;
-        }
+      if(prompt) {
+        fprintf(stderr, "Input: ");
+        fflush(stderr);
       }
-    } while(n == 0);
 
-    mpz_clear(input);
+      if(!(fgets(buf, 1024, stdin))) goto handle_eof;
+      if((p = strchr(buf, '\n'))) *p = '\0';
+    } while(bigint_from_string(cell, buf) == -BIGINT_ILLEGAL_PARAM);
   }
 
   return;
 
  handle_eof:
   if(strcasecmp(eof_value, "nochange") != 0) {
-    mpz_set_str(*cell, eof_value, 0);
+    bigint_from_string(cell, eof_value);
   }
 }
 
 /* Write output from the current cell */
 void output(Memory *mem) {
-  mpz_t *cell;
+  bigint *cell;
+  int c;
+  char *buf;
 
   if(!(cell = get_cell(mem))) return;
 
   if(chario) {
     /* character io */
-    fputc(mpz_get_ui(*cell), stdout);
+    bigint_to_int(cell, &c);
+    fputc(c, stdout);
   } else {
     /* number io */
-    mpz_out_str(stdout, 10, *cell);
-    putchar('\n');
+    buf = malloc(bigint_string_length(cell));
+
+    bigint_to_string(cell, buf);
+    fputs(buf, stdout); fputc('\n', stdout);
+
+    free(buf);
   }
 }
 
 /* Return 1 if the current cell is 0 and 0 otherwise */
 int is_zero(Memory *mem) {
-  mpz_t *cell;
+  bigint *cell;
 
-  cell = get_cell(mem);
+  /* memory leak, return 0 even though the program is about to die */
+  if(!(cell = get_cell(mem))) return 0;
 
-  return mpz_cmp_ui(*cell, 0) == 0;
+  return bigint_is_zero(cell);
 }
