@@ -168,6 +168,8 @@ void run_program(const char *name) {
         break;
     }
 
+    /* count number of instructions that would have been carried out had it not
+       been for the optimising */
     switch(inst->type) {
       case '+': case '-': case '>': case '<':
         steps += abs(inst->u.amount);
