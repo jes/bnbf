@@ -127,9 +127,6 @@ void bigint_add_by(bigint* p_dst, bigint* p_src);
 // add by a single int value
 void bigint_add_by_int(bigint* p_dst, int value);
 
-// subtraction, p_dst could be the same with p_src
-void bigint_sub_by(bigint* p_dst, bigint* p_src);
-
 // subtract by an int value
 void bigint_sub_by_int(bigint* p_dst, int value);
 

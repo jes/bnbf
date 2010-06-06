@@ -723,7 +723,7 @@ void bigint_set_zero(bigint* p_bigint) {
   p_bigint->data_len = 1;
   p_bigint->p_data[0] = 0;
   p_bigint->sign = 0;
-  
+
   bigint_pack_memory(p_bigint);
 
   assert(bigint_is_zero(p_bigint));
@@ -949,24 +949,6 @@ void bigint_add_by_int(bigint* p_dst, int value) {
     bigint_add_by(p_dst, &bi);
     bigint_release(&bi);
 
-  }
-
-}
-
-void bigint_sub_by(bigint* p_dst, bigint* p_src) {
-
-  if (p_dst == p_src) {
-    // self subtraction, return 0
-    bigint_set_zero(p_dst);
-
-  } else {
-
-    // convert 'A-B' into 'A+(-B)'
-    bigint_change_sign(p_src);
-
-    bigint_add_by(p_dst, p_src);
-
-    bigint_change_sign(p_src);
   }
 
 }
