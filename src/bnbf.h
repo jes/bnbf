@@ -48,6 +48,8 @@ typedef struct Memory {
   int neg_len;/* length of neg_mem */
 } Memory;
 
+extern bigint zero, ff;
+
 Memory *make_memory(void);
 void add(Memory *mem, int amt);
 void input(Memory *mem);

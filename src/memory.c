@@ -6,6 +6,8 @@
 
 #include "bnbf.h"
 
+bigint zero, ff;
+
 /* Allocates some memory for a brainfuck program */
 Memory *make_memory(void) {
   int i;
@@ -84,7 +86,6 @@ static bigint *get_cell(Memory *memory) {
 /* Adds the given amount to the current cell of memory */
 void add(Memory *mem, int amt) {
   bigint *cell;
-  bigint zero, ff;
 
   if(!(cell = get_cell(mem))) return;
 
@@ -92,16 +93,11 @@ void add(Memory *mem, int amt) {
 
   /* pretend we have 8-bit cells */
   if(wrap) {
-    bigint_init(&zero); bigint_init(&ff);
-    bigint_add_by_int(&ff, 0xff);
-
     while(bigint_compare(cell, &zero) < 0)
       bigint_add_by_int(cell, 0x100);
 
     while(bigint_compare(cell, &ff) > 0)
       bigint_sub_by_int(cell, 0x100);
-
-    bigint_release(&zero); bigint_release(&ff);
   }
 }
 
