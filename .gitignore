@@ -1,0 +1,4 @@
+*~
+callgrind.out*
+*.o
+src/bnbf
