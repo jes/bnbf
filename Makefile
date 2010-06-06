@@ -2,7 +2,7 @@
 #James Stanley 2010
 
 CFLAGS=-g -Wall
-LDFLAGS=-lgmp
+LDFLAGS=
 PREFIX?=/usr
 OBJS=src/bnbf.o src/options.o src/program.o src/memory.o src/bigint.o
 
