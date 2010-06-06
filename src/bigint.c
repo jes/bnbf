@@ -9,15 +9,11 @@
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
-
 // maximum digits in a int
 #define BIGINT_INT_MAX_DIGITS 10
 
 // the initial memory size of a bigint
 #define BIGINT_INIT_MEM_SIZE 4
-
-// the maximum precision digits of double value
-#define BIGINT_DOUBLE_PRECISION 16
 
 // the maximum length of digits that would be handled by
 // traditional multiplication
@@ -35,12 +31,10 @@
 
 static int bigint_alloc_counter = 0;
 
-
 static void* bigint_alloc(int size) {
   bigint_alloc_counter++;
   return malloc(size);
 }
-
 
 static void bigint_free(void* ptr) {
   bigint_alloc_counter--;
@@ -50,12 +44,10 @@ static void bigint_free(void* ptr) {
   free(ptr);
 }
 
-
 // not published, use 'extern' to get the value
 int bigint_alloc_count() {
   return bigint_alloc_counter;
 }
-
 
 // used by bigint_assure_memory and bigint_pack_memory
 // it is made sure that new_mem_size >= p_bigint->data_len
@@ -75,7 +67,6 @@ static void bigint_set_memory_size(bigint* p_bigint, int new_mem_size) {
 
 }
 
-
 // assure that the big int have enough memory length
 static void bigint_assure_memory(bigint* p_bigint, int min_size) {
 
@@ -90,7 +81,6 @@ static void bigint_assure_memory(bigint* p_bigint, int min_size) {
 
 }
 
-
 // packs the value, remove the leading 0's (except the special case of 0)
 static void bigint_pack_memory(bigint* p_bigint) {
 
@@ -101,7 +91,6 @@ static void bigint_pack_memory(bigint* p_bigint) {
     index--;
   }
 
-
   if (p_bigint->data_len * 4 < p_bigint->mem_size) {
 
     bigint_set_memory_size(p_bigint, p_bigint->data_len * 2);
@@ -109,75 +98,7 @@ static void bigint_pack_memory(bigint* p_bigint) {
   }
 }
 
-
-// check whether we splited a number correctly
-static int bigint_split_number_check(bigint* p_bigint, bigint* p_high,
-                                      bigint* p_low, int low_len) {
-  
-  bigint bi;
-  int ret;
-//   char str[10000];
-// 
-//   bigint_to_string(p_bigint, str);
-//   printf("CHECK SPLIT: %s is\n", str);
-// 
-//   bigint_to_string(p_high, str);
-//   printf("%s ", str);
-// 
-//   bigint_to_string(p_low, str);
-//   printf("%s\n", str);
-
-  bigint_init(&bi);
-  bigint_copy(&bi, p_high);
-  bigint_mul_by_pow_10(&bi, low_len * BIGINT_RADIX_LOG10);
-  bigint_add_by(&bi, p_low);
-  ret = bigint_equal(&bi, p_bigint);
-
-  bigint_release(&bi);
-  return ret;
-}
-
-
-// split a bigint into 2 parts, the lower part has length <= low_len
-// the sign is copied into high and low parts
-// (with the special case of high part = 0)
-// and it is made sure that
-// biging = high * 10^(low_len * BIGINT_RADIX_LOG10) + low
-static void bigint_split_number(bigint* p_bigint, bigint* p_high,
-                                bigint* p_low, int low_len) {
-
-  if (low_len >= p_bigint->data_len) {
-    // special case
-    bigint_set_zero(p_high);
-    bigint_copy(p_low, p_bigint);
-  } else {
-
-    int index;
-
-    p_high->sign = p_bigint->sign;
-    bigint_assure_memory(p_high, p_bigint->data_len - low_len);
-    p_high->data_len = p_bigint->data_len - low_len;
-    for (index = 0; index < p_high->data_len; index++) {
-      p_high->p_data[index] = p_bigint->p_data[low_len + index];
-    }
-    bigint_pack_memory(p_high);
-
-    p_low->sign = p_bigint->sign;
-    bigint_assure_memory(p_low, low_len);
-    p_low->data_len = low_len;
-    for (index = 0; index < p_low->data_len; index++) {
-      p_low->p_data[index] = p_bigint->p_data[index];
-    }
-    bigint_pack_memory(p_low);
-  }
-
-  assert(bigint_split_number_check(p_bigint, p_high, p_low, low_len));
-
-}
-
-
 //////////////////////////////////////////////////////////////////////////
-
 
 void bigint_init(bigint* p_bigint) {
 
@@ -190,8 +111,6 @@ void bigint_init(bigint* p_bigint) {
 
 }
 
-
-
 void bigint_release(bigint* p_bigint) {
 
   BIGINT_FREE(p_bigint->p_data);
@@ -200,8 +119,6 @@ void bigint_release(bigint* p_bigint) {
   p_bigint->p_data = NULL;
 
 }
-
-
 
 void bigint_from_int(bigint* p_bigint, int value) {
 
@@ -239,7 +156,6 @@ void bigint_from_int(bigint* p_bigint, int value) {
       // pick the lower digits from value
       int lower_value = value % BIGINT_RADIX;
       value = value / BIGINT_RADIX;
-
 
       // assure we have memory for 1 more segment
       bigint_assure_memory(p_bigint, p_bigint->data_len + 1);
@@ -616,8 +532,6 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
   return -BIGINT_NOERR;
 }
 
-
-
 int bigint_digit_count(bigint* p_bigint) {
   int len;
 
@@ -652,8 +566,6 @@ int bigint_digit_count(bigint* p_bigint) {
   return len;
 }
 
-
-
 int bigint_string_length(bigint* p_bigint) {
 
   if (bigint_is_negative(p_bigint)) {
@@ -664,8 +576,6 @@ int bigint_string_length(bigint* p_bigint) {
   }
   
 }
-
-
 
 void bigint_to_string(bigint* p_bigint, char* str) {
 
@@ -741,37 +651,6 @@ void bigint_to_string(bigint* p_bigint, char* str) {
   *str = '\0';
 }
 
-
-
-
-bigint_errno bigint_to_double(bigint* p_bigint, double* p_double) {
-
-  // TODO check overflow
-
-  int index = p_bigint->data_len - 1;
-
-  // trivial overflow test
-  if (BIGINT_RADIX_LOG10 * p_bigint->data_len > 310) {
-    return -BIGINT_OVERFLOW;
-  }
-
-  *p_double = 0;
-
-  while (index >= 0) {
-    *p_double *= BIGINT_RADIX;
-    *p_double += p_bigint->p_data[index];
-    index--;
-  }
-
-  if (p_bigint->sign == -1) {
-    *p_double = -*p_double;
-  }
-
-  return -BIGINT_NOERR;
-}
-
-
-
 bigint_errno bigint_to_int(bigint* p_bigint, int* p_int) {
 
   int index;
@@ -812,9 +691,6 @@ bigint_errno bigint_to_int(bigint* p_bigint, int* p_int) {
   return -BIGINT_NOERR;
 }
 
-
-
-
 void bigint_copy(bigint* p_dst, bigint* p_src) {
 
   bigint_assure_memory(p_dst, p_src->data_len);
@@ -826,31 +702,21 @@ void bigint_copy(bigint* p_dst, bigint* p_src) {
   
 }
 
-
-
 void bigint_change_sign(bigint* p_bigint) {
   p_bigint->sign = -p_bigint->sign;
 }
-
-
 
 int bigint_is_positive(bigint* p_bigint) {
   return p_bigint->sign > 0;
 }
 
-
-
 int bigint_is_negative(bigint* p_bigint) {
   return p_bigint->sign < 0;
 }
 
-
-
 int bigint_is_zero(bigint* p_bigint) {
   return p_bigint->sign == 0;
 }
-
-
 
 void bigint_set_zero(bigint* p_bigint) {
 
@@ -864,8 +730,6 @@ void bigint_set_zero(bigint* p_bigint) {
   assert(p_bigint->mem_size > 0);
 }
 
-
-
 void bigint_set_one(bigint* p_bigint) {
 
   p_bigint->data_len = 1;
@@ -878,8 +742,6 @@ void bigint_set_one(bigint* p_bigint) {
   assert(p_bigint->mem_size > 0);
 }
 
-
-
 void bigint_add_by(bigint* p_dst, bigint* p_src) {
 
   if (bigint_is_zero(p_dst)) {
@@ -887,10 +749,8 @@ void bigint_add_by(bigint* p_dst, bigint* p_src) {
 
     bigint_copy(p_dst, p_src);
 
-
   } else if (bigint_is_zero(p_src)) {
     //source is zero, then we need to do nothing
-
 
   } else if (p_src->data_len == 1) {
     // if we got a small number, we could use quicker routine to handle that
@@ -905,11 +765,6 @@ void bigint_add_by(bigint* p_dst, bigint* p_src) {
 
     }
 
-  } else if (p_dst == p_src) {
-    // if the source is the same as destination, we could simply
-    // multiply the destination by 2
-    bigint_mul_by_int(p_dst, 2);
-
   } else {
 
     // normal case
@@ -921,7 +776,6 @@ void bigint_add_by(bigint* p_dst, bigint* p_src) {
 
     // assure we have enough memory
     bigint_assure_memory(p_dst, result_mem_size_bound);
-
 
     // set the top segments to 0
     for (index = p_dst->data_len; index < result_mem_size_bound; index++) {
@@ -1004,8 +858,6 @@ void bigint_add_by(bigint* p_dst, bigint* p_src) {
   }
 
 }
-
-
 
 void bigint_add_by_int(bigint* p_dst, int value) {
 
@@ -1101,8 +953,6 @@ void bigint_add_by_int(bigint* p_dst, int value) {
 
 }
 
-
-
 void bigint_sub_by(bigint* p_dst, bigint* p_src) {
 
   if (p_dst == p_src) {
@@ -1121,502 +971,10 @@ void bigint_sub_by(bigint* p_dst, bigint* p_src) {
 
 }
 
-
-
 void bigint_sub_by_int(bigint* p_dst, int value) {
   // convert 'A-B' into 'A+(-B)'
   bigint_add_by_int(p_dst, -value);
 }
-
-
-// traditional multiplication, do it segment by segment
-// not published, this function is not very fast on large numbers
-void bigint_mul_by_trad(bigint* p_dst, bigint* p_src) {
-
-  if (p_dst == p_src) {
-    // self multiply self
-    bigint bi;
-    bigint_init(&bi);
-    bigint_copy(&bi, p_src);
-    bigint_mul_by_trad(p_dst, &bi);
-    bigint_release(&bi);
-  } else {
-
-    bigint bi;
-    bigint bi_add;
-    int i;
-    bigint_init(&bi);
-    bigint_init(&bi_add);
-    bigint_set_zero(&bi);
-
-    if (p_src->sign < 0) {
-      bigint_change_sign(p_dst);
-    }
-
-    for (i = 0; i < p_src->data_len; i++) {
-      bigint_copy(&bi_add, p_dst);
-      bigint_mul_by_int(&bi_add, p_src->p_data[i]);
-      bigint_mul_by_pow_10(&bi_add, i * BIGINT_RADIX_LOG10);
-      bigint_add_by(&bi, &bi_add);
-    }
-
-    bigint_copy(p_dst, &bi);
-
-    bigint_release(&bi);
-    bigint_release(&bi_add);
-  }
-}
-
-
-void bigint_mul_by(bigint* p_dst, bigint* p_src) {
-  if (p_dst == p_src) {
-    // self multiply self
-    bigint bi;
-    bigint_init(&bi);
-    bigint_copy(&bi, p_src);
-    bigint_mul_by(p_dst, &bi);
-    bigint_release(&bi);
-  } else {
-
-    if (bigint_is_zero(p_dst) || bigint_is_zero(p_src)) {
-      // handle special cases
-      bigint_set_zero(p_dst);
-
-    } else if (p_dst->data_len < BIGINT_MUL_THRESHOLD &&
-                p_src->data_len < BIGINT_MUL_THRESHOLD) {
-
-      // small operands, use traditional method
-      bigint_mul_by_trad(p_dst, p_src);
-
-    } else if (p_dst->data_len <= BIGINT_MUL_THRESHOLD &&
-                p_src->data_len > BIGINT_MUL_THRESHOLD) {                  
-
-      // src is long enough
-      bigint bi;
-      bigint bi_high;
-      bigint bi_low;
-      int low_len = p_src->data_len / 2;
-
-      bigint_init(&bi);
-      bigint_init(&bi_high);
-      bigint_init(&bi_low);
-
-      bigint_copy(&bi, p_dst);
-
-      bigint_split_number(p_src, &bi_high, &bi_low, low_len);
-
-      bigint_mul_by(&bi, &bi_high);
-      bigint_mul_by_pow_10(&bi, low_len * BIGINT_RADIX_LOG10);
-
-      bigint_mul_by(p_dst, &bi_low);
-
-      bigint_add_by(p_dst, &bi);
-
-      bigint_release(&bi);
-      bigint_release(&bi_high);
-      bigint_release(&bi_low);
-
-      if (p_src->sign < 0) {
-        bigint_change_sign(p_dst);
-      }
-
-    } else if (p_dst->data_len > BIGINT_MUL_THRESHOLD &&
-                p_src->data_len <= BIGINT_MUL_THRESHOLD) {
-
-      // dst is long enough
-      bigint bi_high;
-      bigint bi_low;
-      int low_len = p_dst->data_len / 2;
-
-      bigint_init(&bi_high);
-      bigint_init(&bi_low);
-
-      bigint_split_number(p_dst, &bi_high, &bi_low, low_len);
-      bigint_mul_by(&bi_high, p_src);
-      bigint_mul_by_pow_10(&bi_high, low_len * BIGINT_RADIX_LOG10);
-      bigint_mul_by(&bi_low, p_src);
-
-      bigint_copy(p_dst, &bi_high);
-      bigint_add_by(p_dst, &bi_low);
-
-      bigint_release(&bi_high);
-      bigint_release(&bi_low);
-
-      if (p_src->sign < 0) {
-        bigint_change_sign(p_dst);
-      }
-
-    } else {
-      // both operands are long enough
-
-      bigint bi_dst_high;
-      bigint bi_dst_low;
-      bigint bi_src_high;
-      bigint bi_src_low;
-
-      bigint bi;
-
-      int low_len = (p_dst->data_len + p_src->data_len) / 4;
-
-      bigint_init(&bi_dst_high);
-      bigint_init(&bi_dst_low);
-      bigint_init(&bi_src_high);
-      bigint_init(&bi_src_low);
-
-      bigint_init(&bi);
-
-      bigint_split_number(p_src, &bi_src_high, &bi_src_low, low_len);
-      bigint_split_number(p_dst, &bi_dst_high, &bi_dst_low, low_len);
-
-      bigint_copy(&bi, &bi_dst_high);
-      bigint_mul_by(&bi, &bi_src_low);
-
-      bigint_copy(p_dst, &bi);
-
-      bigint_copy(&bi, &bi_src_high);
-      bigint_mul_by(&bi, &bi_dst_low);
-
-      bigint_add_by(p_dst, &bi);
-
-      bigint_mul_by_pow_10(p_dst, low_len * BIGINT_RADIX_LOG10);
-
-      bigint_mul_by(&bi_dst_low, &bi_src_low);
-      bigint_add_by(p_dst, &bi_dst_low);
-
-      bigint_mul_by(&bi_dst_high, &bi_src_high);
-      bigint_mul_by_pow_10(&bi_dst_high, low_len * BIGINT_RADIX_LOG10 * 2);
-      bigint_add_by(p_dst, &bi_dst_high);
-
-      bigint_release(&bi_dst_high);
-      bigint_release(&bi_dst_low);
-      bigint_release(&bi_src_high);
-      bigint_release(&bi_src_low);
-
-      bigint_release(&bi);
-
-      if (p_src->sign < 0) {
-        bigint_change_sign(p_dst);
-      }
-
-    }
-  }
-
-}
-
-
-void bigint_mul_by_int(bigint* p_bigint, int value) {
-
-  if (value == 0) {
-    // special case, set p_bigint to 0
-    bigint_set_zero(p_bigint);
-
-  } else if (value == 1) {
-    // do nothing
-
-  } else if (value == -1) {
-    // change sign
-    bigint_change_sign(p_bigint);
-
-  } else {
-    // general case
-
-    // the maximum number of shfit
-    int max_segment_incr = (BIGINT_INT_MAX_DIGITS / BIGINT_RADIX_LOG10) + 1;
-
-    long long prod;
-
-    int index;
-
-    int carry = 0;
-
-    // assure memory for more segments
-    bigint_assure_memory(p_bigint, p_bigint->data_len + max_segment_incr);
- 
-    if (value < 0) {
-      bigint_change_sign(p_bigint);
-      value = -value;
-    }
-
-    // from now on, only consider the case of value > 1
-
-    for (index = 0; index < p_bigint->data_len || carry != 0; index++) {
-
-      // set uninitialized parts to be 0
-      if (index >= p_bigint->data_len) {
-        p_bigint->p_data[index] = 0;
-      }
-
-      prod = (p_bigint->p_data[index] * (long long) value + carry);
-
-      carry = (int) (prod / BIGINT_RADIX);
-
-      p_bigint->p_data[index] = prod % BIGINT_RADIX;
-
-    }
-
-    p_bigint->data_len = index;
-
-  }
-
-}
-
-
-
-void bigint_mul_by_pow_10(bigint* p_bigint, int pow) {
-
-  // we dont consider the case of pow = 1, where nothing should be done
-  if (pow < 0) {
-    bigint_div_by_pow_10(p_bigint, -pow);
-    
-  } else if (pow > 0) {
-    int approx_segments = pow / BIGINT_RADIX_LOG10 + 2 + p_bigint->data_len;
-    int* p_new_data = BIGINT_ALLOC(sizeof(int) * (approx_segments));
-    int prod;
-    int index;
-
-    // helper variable
-    int helper_var;
-
-    // number of 0 segments need to insert at the back of segments
-    helper_var = pow / BIGINT_RADIX_LOG10;
-
-    for (index = 0; index < helper_var; index++) {
-      p_new_data[index] = 0;
-    }
-
-    // copy original numbers here
-    for (index = 0; index < p_bigint->data_len; index++) {
-      p_new_data[index + helper_var] = p_bigint->p_data[index];
-    }
-
-    p_bigint->data_len += helper_var;
-    BIGINT_FREE(p_bigint->p_data);
-    p_bigint->p_data = p_new_data;
-    p_bigint->mem_size = approx_segments;
-
-
-    // get the value to multiply as a param of bigint_mul_by_int
-    helper_var = pow % BIGINT_RADIX_LOG10;
-    prod = 1;
-    while (helper_var > 0) {
-      prod *= 10;
-      helper_var--;
-    }
-
-    bigint_mul_by_int(p_bigint, prod);
-
-  }
-}
-
-
-
-bigint_errno bigint_pow_by_int(bigint* p_bigint, int pow) {
-
-  if (pow < 0) {
-    return -BIGINT_ILLEGAL_PARAM;
-  } else if (pow == 0) {
-    bigint_set_one(p_bigint);
-  } else if (pow > 1) {
-    if (pow % 2 == 1) {
-      bigint bi;
-      bigint_init(&bi);
-      bigint_copy(&bi, p_bigint);
-      bigint_pow_by_int(p_bigint, pow / 2);
-      bigint_mul_by(p_bigint, p_bigint);
-      bigint_mul_by(p_bigint, &bi);
-      bigint_release(&bi);
-    } else {
-      bigint_pow_by_int(p_bigint, pow / 2);
-      bigint_mul_by(p_bigint, p_bigint);
-    }
-  }
-
-  return BIGINT_NOERR;
-}
-
-
-bigint_errno bigint_div_by_int(bigint* p_bigint, int div) {
-
-  if (div == 0) {
-    return -BIGINT_ILLEGAL_PARAM;
-  }
-
-  if (div < 0) {
-    div = -div;
-    bigint_change_sign(p_bigint);
-  }
-
-  if (div != 1) {
-    // from now on, only consider the case of value > 1
-
-    // the value that holds a segment's value
-    long long val = 0;
-    long long r;
-
-    int index;
-    for (index = p_bigint->data_len - 1; index >= 0; index--) {
-      val += (long long) p_bigint->p_data[index];
-      r = val % ((long long) div);
-      p_bigint->p_data[index] = (int) (val / (long) (long) div);
-      val = r * BIGINT_RADIX;
-    }
-    
-    bigint_pack_memory(p_bigint);
-  }
-
-  return BIGINT_NOERR;
-}
-
-
-
-void bigint_div_by_pow_10(bigint* p_bigint, int pow) {
-
-  // we don't consider the case of pow = 1, where nothing should be done
-  if (pow < 0) {
-    bigint_mul_by_pow_10(p_bigint, -pow);
-
-  } else if (pow > 0) {
-
-    // the number of segments that should be directly thrown away
-    int throw_segments = pow / BIGINT_RADIX_LOG10;
-
-    // the additional number of digits that should be thrown away
-    int throw_offset = pow % BIGINT_RADIX_LOG10;
-
-    // approximate segments in result
-    int approx_len = p_bigint->data_len - throw_segments + 1;
-
-    if (p_bigint->data_len <= throw_segments) {
-      // too much data is thrown away, the result is definitly zero
-
-      assert(pow > bigint_digit_count(p_bigint));
-      bigint_set_zero(p_bigint);
-
-    } else {
-
-      int index;
-
-      // we might need to shift the number, insert new digits in the lower
-      // part of the number. we will do this by multiplying 'prod'
-      int prod = 1;
-
-      // we might need to add a trailing number, by adding 'trailing'
-      int trailing = 0;
-
-      int* p_new_data = (int *) BIGINT_ALLOC(sizeof(int) * approx_len);
-
-      if (throw_offset != 0) {
-
-        // if the throw_offset is not zero, then we have to consider
-        // the segment between 'thrown' and 'not thrown' segments.
-        // we try to get the final trailing zeros, and use the following
-        // formula:
-        //   value = 'not thrown' * prod + trailing
-
-        int i;
-
-        trailing = p_bigint->p_data[throw_segments];
-        prod = BIGINT_RADIX;
-
-        for (i = 0; i < throw_offset; i++) {
-          trailing /= 10;
-          prod /= 10;
-        }
-
-        for (index = 0; index + throw_segments + 1 < p_bigint->data_len; index++) {
-          p_new_data[index] = p_bigint->p_data[index + throw_segments + 1];
-        }
-
-        BIGINT_FREE(p_bigint->p_data);
-
-        p_bigint->data_len -= throw_segments + 1;
-        p_bigint->p_data = p_new_data;
-        p_bigint->mem_size = approx_len;
-
-        bigint_mul_by_int(p_bigint, prod);
-        bigint_add_by_int(p_bigint, trailing);
-
-      } else {
-        // only need to discard a few segments
-
-        BIGINT_FREE(p_bigint->p_data);
-
-        p_bigint->data_len -= throw_segments;
-        p_bigint->p_data = p_new_data;
-        p_bigint->mem_size = approx_len;
-
-      }
-      
-    }
-  }
-}
-
-
-
-bigint_errno bigint_mod_int(bigint* p_bigint, int value, int* p_result) {
-
-  long long r = 0;
-
-  int i;
-
-  if (value == 0) {
-    return -BIGINT_ILLEGAL_PARAM;
-  }
-
-  for (i = p_bigint->data_len - 1; i >= 0; i--) {
-    r = (r * BIGINT_RADIX + p_bigint->p_data[i]) % value;
-  }
-
-  if (p_bigint->sign < 0) {
-    r = -r;
-  }
-
-  assert(-2147483648ll <= r && r < 2147483648ull);
-
-  *p_result = (int) r;
-
-  return BIGINT_NOERR;
-}
-
-
-
-bigint_errno bigint_mod_by_pow_10(bigint* p_bigint, int pow) {
-
-  // the segments to keep
-  int keep_segments;
-
-  // the digits to keep with the segments to keep
-  int keep_digits;
-
-  if (pow < 0) {
-    return -BIGINT_ILLEGAL_PARAM;
-  }
-
-  // from now on pow >= 0
-
-  keep_segments = pow / BIGINT_RADIX_LOG10;
-  keep_digits = pow % BIGINT_RADIX_LOG10;
-
-  if (keep_segments < p_bigint->data_len) {
-
-    // only consider the case that only some number should be kept
-    int r = 1;
-    int i;
-
-    p_bigint->data_len = keep_segments + 1;
-
-    for (i = 0; i < keep_digits; i++) {
-      r *= 10;
-    }
-
-    p_bigint->p_data[p_bigint->data_len - 1] %= r;
-    bigint_pack_memory(p_bigint);
-  }
-
-  return BIGINT_NOERR;
-}
-
-
 
 int bigint_compare(bigint* p_bigint1, bigint* p_bigint2) {
   if (p_bigint1->sign < p_bigint2->sign) {
@@ -1674,52 +1032,9 @@ int bigint_compare(bigint* p_bigint1, bigint* p_bigint2) {
   }
 }
 
-
-
-
 int bigint_equal(bigint* p_bigint1, bigint* p_bigint2) {
   if (p_bigint1 == p_bigint2)
     return 1;
   else
     return bigint_compare(p_bigint1, p_bigint2) == 0;
 }
-
-
-
-
-int bigint_nth_digit(bigint* p_bigint, int nth) {
-
-  if (nth < 0) {
-    // handle error
-    return -1;
-
-  } else if (bigint_is_zero(p_bigint)) {
-    // when the bigint is zero, every nth will return 0
-    return 0;
-
-  } else {
-    // general case, with bigint > 0
-
-    // which segment is the value located
-    int segment = nth / BIGINT_RADIX_LOG10;
-    
-    // the offset in the segment
-    int segment_offset = nth % BIGINT_RADIX_LOG10;
-
-    // test if the segment is with in data range
-    if (segment >= p_bigint->data_len) {
-      // nth is too big for this number, always return 0
-      return 0;
-
-    } else {
-      // the value of the segment
-      int segment_value = p_bigint->p_data[segment];
-      while (segment_offset > 0) {
-        segment_value /= 10;
-        segment_offset--;
-      }
-      return segment_value % 10;
-    }
-  }
-}
-
