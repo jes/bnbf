@@ -24,6 +24,15 @@ extern int wrap;
 void parse_options(int argc, char **argv);
 
 /* program.c */
+#define ADD    0
+#define SUB    1
+#define LEFT   2
+#define RIGHT  3
+#define SLOOP  4
+#define ELOOP  5
+#define INPUT  6
+#define OUTPUT 7
+
 typedef struct Inst {
   char type;/* type of instruction */
   union {

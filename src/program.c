@@ -56,6 +56,7 @@ void run_program(const char *name) {
   int c;
   int inst_count = 0;
   char *instructions = "+-<>[],.";
+  char *p;
   Memory *mem;
 
   /* benchmarking counters */
@@ -76,16 +77,19 @@ void run_program(const char *name) {
 
   /* Read the program in to the instruction list */
   while((c = fgetc(fp)) != EOF) {
-    if(!strchr(instructions, c)) continue;
+    if(!(p = strchr(instructions, c))) continue;
+
+    /* convert to instruction number */
+    c = p - instructions;
 
     inst_count++;
 
     switch(c) {
-      case '[':/* loop entry, push address on to stack */
+      case SLOOP:/* loop entry, push address on to stack */
         inst = new_inst(c, &program, inst);
         push(inst);
         break;
-      case ']':/* loop exit, sort out loop addresses */
+      case ELOOP:/* loop exit, sort out loop addresses */
         inst = new_inst(c, &program, inst);
 
         if(sp <= 0) {
@@ -100,18 +104,18 @@ void run_program(const char *name) {
         i->u.loop = inst;
         inst->u.loop = i;
         break;
-      case '+': case '-':/* addition/subtraction, adjust amount of adds */
-        if(inst && inst->type == c) inst->u.amount += (c == '+' ? 1 : -1);
+      case ADD: case SUB:/* addition/subtraction, adjust amount of adds */
+        if(inst && inst->type == c) inst->u.amount += (c == ADD ? 1 : -1);
         else {
           inst = new_inst(c, &program, inst);
-          inst->u.amount = (c == '+' ? 1 : -1);
+          inst->u.amount = (c == ADD ? 1 : -1);
         }
         break;
-      case '>': case '<':/* inc/dec pointer, adjust amount of moves */
-        if(inst && inst->type == c) inst->u.amount += (c == '>' ? 1 : -1);
+      case LEFT: case RIGHT:/* inc/dec pointer, adjust amount of moves */
+        if(inst && inst->type == c) inst->u.amount += (c == RIGHT ? 1 : -1);
         else {
           inst = new_inst(c, &program, inst);
-          inst->u.amount = (c == '>' ? 1 : -1);;
+          inst->u.amount = (c == RIGHT ? 1 : -1);;
         }
         break;
       default:
@@ -149,24 +153,24 @@ void run_program(const char *name) {
   while(inst->type != '!' && !stop_program) {
     /* carry out instruction */
     switch(inst->type) {
-      case '+': case '-':
+      case ADD: case SUB:
         add(mem, inst->u.amount);
         break;
-      case '>': case '<':
+      case LEFT: case RIGHT:
         mem->mp += inst->u.amount;
         if(mem->mp > high_mp) high_mp = mem->mp;
         if(mem->mp < low_mp) low_mp = mem->mp;
         break;
-      case ',':
+      case INPUT:
         input(mem);
         break;
-      case '.':
+      case OUTPUT:
         output(mem);
         break;
-      case '[':
+      case SLOOP:
         if(is_zero(mem)) inst = inst->u.loop;
         break;
-      case ']':
+      case ELOOP:
         if(!is_zero(mem)) inst = inst->u.loop;
         break;
     }
@@ -174,7 +178,7 @@ void run_program(const char *name) {
     /* count number of instructions that would have been carried out had it not
        been for the optimising */
     switch(inst->type) {
-      case '+': case '-': case '>': case '<':
+      case ADD: case SUB: case LEFT: case RIGHT:
         steps += abs(inst->u.amount);
         break;
       default:
