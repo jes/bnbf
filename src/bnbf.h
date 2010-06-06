@@ -1,8 +1,8 @@
 /* Header for bnbf
 
-   See "COPYING" for license details
+See "COPYING" for license details
 
-   James Stanley 2010 */
+James Stanley 2010 */
 
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +13,6 @@
 #include "config.h"
 
 /* options.c */
-extern struct argp argp;
 extern int benchmark;
 extern int chario;
 extern char *eof_value;
@@ -37,7 +36,6 @@ void run_program(const char *name);
 void free_program(Inst *prog);
 
 /* memory.c */
-#define POS 0
 typedef struct Memory {
   int mp;/* memory pointer */
   mpz_t *pos_mem;/* positive-address memory */
@@ -52,3 +50,14 @@ void input(Memory *mem);
 void output(Memory *mem);
 int is_zero(Memory *mem);
 void free_memory(Memory *mem);
+
+/* bignum.c */
+typedef struct Bignum {
+  unsigned char *byte;
+  char sign;
+  int num_bytes;
+} Bignum;
+
+Bignum *new_bignum(void);
+void add_bignum(Bignum *b, long n);
+void print_bignum(Bignum *b, FILE *fp);
