@@ -1,0 +1,67 @@
+Project Euler problem 2 in brainfuck
+James Stanley
+
+C version:
+[
+  int last[2];
+  int n = 0;
+  int answer = 2;
+
+  last[0] = 1;
+  last[1] = 2;
+
+  while(n <= 4000000) {
+    n = last[0] + last[1];
+    last[0] = last[1];
+    last[1] = n;
+    if((n % 2) == 0) answer += n;//If even, add to answer
+  }
+
+  printf("%d\n", answer);
+]
+
+last_0 = 1
+last_1 = 2
+memory pointer left at last_0
++>++<
+
+=== (last0=1) last1=2 last1a=0 last1b=0 last1c=0 4m=0 ===
+
+build 4 million
+>>>>>>>>>>>++++++++++[<++++++++++[<++++++++++[<++++++++++[<++++++++++[<++++++++++
+[<++++>-]>-]>-]>-]>-]>-]<<<<<<
+
+memory pointer now at 4m
+
+=== (last0=1) last1=2 last1a=0 last1b=0 last1c=0 4m=4000000 4mc=0 ===
+
+move last_1 to last1a and last1c
+>[->+>>+<<<]
+move last1a to last_1
+>[-<+>]
+now we're at last1
+
+
+
+*** here we need to move the pointer back to last0 ***
+
+=== (last0) last1 last1a=0 last1b=0 last1c ===
+
+move last1 to last1a and last1b
+>[>+>+<<-]
+move last1a back to last1
+>[<+>-]
+empty last0 and add it to last1
+<<[>+<-]
+move last1b to last0
+>>>[<<<+>>>-]
+
+=== last0 last1 last1a=0 (last1b=0) ===
+
+*** here we need to check if last1 is even and if so add it to the answer ***
+
+*** here we need to move the pointer back to last0 ***
+
+*** here we need to end the loop over 4 million ***
+
+*** here we need to print out the answer */

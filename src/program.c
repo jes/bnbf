@@ -195,7 +195,7 @@ void run_program(const char *name) {
 
   free_program(program);
   free_memory(mem);
-  /* stack is already empty if we got this far */
+  /* loop stack is already empty if we got this far, no need to free it */
 }
 
 /* Walk the list freeing each node */
