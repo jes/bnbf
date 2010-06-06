@@ -1,4 +1,5 @@
 program: memory overflow, perhaps you need to adjust the --max-mem option or fix a memory leak in your program.
+program: total program length: 56
 program: execution steps used: 56
 program: high address visited: 0
 program:  low address visited: -31

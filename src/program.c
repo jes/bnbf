@@ -54,6 +54,7 @@ void run_program(const char *name) {
   Inst *inst = NULL;
   Inst *i;
   int c;
+  int inst_count = 0;
   char *instructions = "+-<>[],.";
   Memory *mem;
 
@@ -76,6 +77,8 @@ void run_program(const char *name) {
   /* Read the program in to the instruction list */
   while((c = fgetc(fp)) != EOF) {
     if(!strchr(instructions, c)) continue;
+
+    inst_count++;
 
     switch(c) {
       case '[':/* loop entry, push address on to stack */
@@ -184,6 +187,7 @@ void run_program(const char *name) {
 
   /* benchmarking information */
   if(benchmark) {
+    fprintf(stderr, "%s: total program length: %d\n", program_name, inst_count);
     fprintf(stderr, "%s: execution steps used: %d\n", program_name, steps);
     fprintf(stderr, "%s: high address visited: %d\n", program_name, high_mp);
     fprintf(stderr, "%s:  low address visited: %d\n", program_name, low_mp);
