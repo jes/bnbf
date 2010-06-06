@@ -36,7 +36,7 @@ void free_memory(Memory *mem) {
 
 /* Returns a pointer to the current cell of memory in mem. Sorts out the
    growing of memory where necessary */
-static bigint *get_cell(Memory *memory) {
+static inline bigint *get_cell(Memory *memory) {
   int i;
   int *len;
   bigint **mem;
