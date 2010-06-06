@@ -26,7 +26,10 @@ void parse_options(int argc, char **argv);
 /* program.c */
 typedef struct Inst {
   char type;/* type of instruction */
-  struct Inst *loop;/* address of corresponding loop entry/exit */
+  union {
+    struct Inst *loop;/* address of corresponding loop entry/exit */
+    long amount;/* number of this instruction to carry out */
+  } u;
   struct Inst *next;/* next instruction to execute */
 } Inst;
 

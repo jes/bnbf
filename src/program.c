@@ -28,6 +28,25 @@ static void *pop(void) {
   return p;
 }
 
+/* Allocate and return a new instruction for the given program, setting the
+   program pointer if necessary, and setting the last instruction's next
+   pointer */
+static Inst *new_inst(char type, Inst **program, Inst *last) {
+  Inst *i;
+
+  i = malloc(sizeof(Inst));
+  
+  if(*program) last->next = i;
+  else *program = i;
+
+  i->type = type;
+  i->u.loop = NULL;
+  i->u.amount = 0;
+  i->next = NULL;
+
+  return i;
+}
+
 /* Runs the program with the given file name. "-" means stdin */
 void run_program(const char *name) {
   FILE *fp;
@@ -58,34 +77,47 @@ void run_program(const char *name) {
   while((c = fgetc(fp)) != EOF) {
     if(!strchr(instructions, c)) continue;
 
-    if(program) {
-      inst->next = malloc(sizeof(Inst));
-      inst = inst->next;
-    } else {
-      inst = malloc(sizeof(Inst));
-      program = inst;
-    }
+    switch(c) {
+      case '[':/* loop entry, push address on to stack */
+        inst = new_inst(c, &program, inst);
+        push(inst);
+        break;
+      case ']':/* loop exit, sort out loop addresses */
+        inst = new_inst(c, &program, inst);
 
-    inst->type = c;
-    inst->loop = NULL;
-    
-    if(c == '[') {
-      /* loop entry, push its address on to the stack */
-      push(inst);
-    } else if(c == ']') {
-      if(sp <= 0) {
-        fprintf(stderr, "%s: mismatched loops.\n", name);
-        free(stack);
-        free_program(program);
-        return;
-      }
+        if(sp <= 0) {
+          /* loop exit with no corresponding start */
+          fprintf(stderr, "%s: mismatched loops.\n", name);
+          free(stack);
+          free_program(program);
+          return;
+        }
 
-      /* loop exit, fill in loop addresses */
-      i = pop();
-      i->loop = inst;
-      inst->loop = i;
+        i = pop();
+        i->u.loop = inst;
+        inst->u.loop = i;
+        break;
+      case '+': case '-':/* addition/subtraction, adjust amount of adds */
+        if(inst && inst->type == c) inst->u.amount += (c == '+' ? 1 : -1);
+        else {
+          inst = new_inst(c, &program, inst);
+          inst->u.amount = (c == '+' ? 1 : -1);
+        }
+        break;
+      case '>': case '<':/* inc/dec pointer, adjust amount of moves */
+        if(inst && inst->type == c) inst->u.amount += (c == '>' ? 1 : -1);
+        else {
+          inst = new_inst(c, &program, inst);
+          inst->u.amount = (c == '>' ? 1 : -1);;
+        }
+        break;
+      default:
+        inst = new_inst(c, &program, inst);
+        break;
     }
   }
+
+  /* don't close stdin, we need it for program input */
   if(fp != stdin) fclose(fp);
 
   /* empty program */
@@ -112,35 +144,37 @@ void run_program(const char *name) {
 
   inst = program;
   while(inst->type != '!' && !stop_program) {
-    steps++;
+    /* carry out instruction */
+    switch(inst->type) {
+      case '+': case '-':
+        add(mem, inst->u.amount);
+        break;
+      case '>': case '<':
+        mem->mp += inst->u.amount;
+        if(mem->mp > high_mp) high_mp = mem->mp;
+        if(mem->mp < low_mp) low_mp = mem->mp;
+        break;
+      case ',':
+        input(mem);
+        break;
+      case '.':
+        output(mem);
+        break;
+      case '[':
+        if(is_zero(mem)) inst = inst->u.loop;
+        break;
+      case ']':
+        if(!is_zero(mem)) inst = inst->u.loop;
+        break;
+    }
 
     switch(inst->type) {
-    case '+':
-      add(mem, 1);
-      break;
-    case '-':
-      add(mem, -1);
-      break;
-    case '>':
-      mem->mp++;
-      if(mem->mp > high_mp) high_mp = mem->mp;
-      break;
-    case '<':
-      mem->mp--;
-      if(mem->mp < low_mp) low_mp = mem->mp;
-      break;
-    case ',':
-      input(mem);
-      break;
-    case '.':
-      output(mem);
-      break;
-    case '[':
-      if(is_zero(mem)) inst = inst->loop;
-      break;
-    case ']':
-      if(!is_zero(mem)) inst = inst->loop;
-      break;
+      case '+': case '-': case '>': case '<':
+        steps += abs(inst->u.amount);
+        break;
+      default:
+        steps++;
+        break;
     }
 
     inst = inst->next;
