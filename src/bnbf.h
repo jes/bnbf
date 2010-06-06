@@ -8,9 +8,9 @@ James Stanley 2010 */
 #include <string.h>
 #include <getopt.h>
 #include <stdio.h>
-#include <gmp.h>
 
 #include "config.h"
+#include "bigint.h"
 
 /* options.c */
 extern int benchmark;
@@ -18,6 +18,7 @@ extern int chario;
 extern char *eof_value;
 extern int maxmem;
 extern int noneg;
+extern int prompt;
 extern int wrap;
 
 void parse_options(int argc, char **argv);
@@ -38,8 +39,8 @@ void free_program(Inst *prog);
 /* memory.c */
 typedef struct Memory {
   int mp;/* memory pointer */
-  mpz_t *pos_mem;/* positive-address memory */
-  mpz_t *neg_mem;/* negative-address memory */
+  bigint *pos_mem;/* positive-address memory */
+  bigint *neg_mem;/* negative-address memory */
   int pos_len;/* length of pos_mem */
   int neg_len;/* length of neg_mem */
 } Memory;
@@ -50,14 +51,3 @@ void input(Memory *mem);
 void output(Memory *mem);
 int is_zero(Memory *mem);
 void free_memory(Memory *mem);
-
-/* bignum.c */
-typedef struct Bignum {
-  unsigned char *byte;
-  char sign;
-  int num_bytes;
-} Bignum;
-
-Bignum *new_bignum(void);
-void add_bignum(Bignum *b, long n);
-void print_bignum(Bignum *b, FILE *fp);

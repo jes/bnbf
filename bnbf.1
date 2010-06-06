@@ -2,7 +2,7 @@
 .SH NAME
 bnbf \- Bignum brainfuck interpreter with various runtime options
 .SH SYNOPSIS
-\fBbnbf\fP [-bcnw?V] [-e value] [-m address] [--benchmark] [--char-io] [--eof=value] [--max-mem=address] [--no-negative] [--wrap] [--help] [--usage] [--version] FILE...
+\fBbnbf\fP [-bcnpw?V] [-e value] [-m address] [--benchmark] [--char-io] [--eof=value] [--max-mem=address] [--no-negative] [--prompt] [--wrap] [--help] [--usage] [--version] FILE...
 .SS Options
 .TP
 \fB-b, --benchmark\fP
@@ -19,6 +19,9 @@ Set limit on highest valid memory address.
 .TP
 \fB-n, --no-negative\fP
 Prevent negative addresses from being used.
+.TP
+\fB-p, --prompt\fP
+Print a prompt when waiting for number input
 .TP
 \fB-w, --wrap\fP
 Wrap values as if they were unsigned bytes.
