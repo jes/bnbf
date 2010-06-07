@@ -97,7 +97,7 @@ void add(Memory *mem, int amt) {
       bigint_add_by_int(cell, 0x100);
 
     while(bigint_compare(cell, &ff) > 0)
-      bigint_sub_by_int(cell, 0x100);
+      bigint_add_by_int(cell, -0x100);
   }
 }
 

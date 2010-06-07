@@ -134,15 +134,6 @@ void bigint_add_by(bigint* p_dst, bigint* p_src);
 // add by a single int value
 void bigint_add_by_int(bigint* p_dst, int value);
 
-// subtract by an int value
-void bigint_sub_by_int(bigint* p_dst, int value);
-
-// multiply by another bigint
-void bigint_mul_by(bigint* p_dst, bigint* p_src);
-
-// multiplication by a integer, this is quicker than bigint_mul_by
-void bigint_mul_by_int(bigint* p_dst, int value);
-
 // return -1 if p_bigint1 < p_bigint2
 // return 0 if p_bigint1 == p_bigint2
 // return 1 if p_bigint1 > p_bigint2

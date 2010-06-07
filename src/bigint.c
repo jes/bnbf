@@ -128,10 +128,10 @@ void bigint_release(bigint* p_bigint) {
 }
 
 void bigint_from_int(bigint* p_bigint, int value) {
-
   // set up the sign
   if (value < 0) {
     p_bigint->sign = -1;
+    value = -value;
   } else if (value > 0) {
     p_bigint->sign = 1;
   } else {
@@ -139,16 +139,12 @@ void bigint_from_int(bigint* p_bigint, int value) {
   }
 
   // from now on, only consider the case of value >= 0
-  if (value < 0) {
-    value = -value;
-  }
 
-  
-  if (value == 0) {
+  if (value < BIGINT_RADIX) {
     // handle special case, value = 0
 
     p_bigint->data_len = 1;
-    p_bigint->p_data[0] = 0;
+    p_bigint->p_data[0] = value;
 
   } else {
     // value > 0
@@ -886,7 +882,6 @@ void bigint_add_by_int(bigint* p_dst, int value) {
 
       if (p_dst->sign < 0) {
         bigint_from_int(p_dst, -p_dst->p_data[0] + value);
-
       } else {
         bigint_from_int(p_dst, p_dst->p_data[0] + value);
       }
@@ -958,11 +953,6 @@ void bigint_add_by_int(bigint* p_dst, int value) {
 
   }
 
-}
-
-void bigint_sub_by_int(bigint* p_dst, int value) {
-  // convert 'A-B' into 'A+(-B)'
-  bigint_add_by_int(p_dst, -value);
 }
 
 int bigint_compare(bigint* p_bigint1, bigint* p_bigint2) {
