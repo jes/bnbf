@@ -137,7 +137,8 @@ void run_program(const char *name) {
   if(!program) return;
 
   if(sp > 0) {
-    fprintf(stderr, "%s: mismatched loops (missing %d end-loops).\n", name, sp);
+    fprintf(stderr, "%s: mismatched loops (missing %d end-loop%s).\n", name,
+            sp, sp == 1 ? "" : "s");
     free(stack);
     free_program(program);
     return;
@@ -216,6 +217,12 @@ void run_program(const char *name) {
 
     inst = inst->next;
   }
+
+  /* undo the adjacency optimisations in case of overflow so that the memory
+     addresses reached are what they would be if there was no adjacency
+     optimisation */
+  if(high_mp > (maxmem + 1)) high_mp = maxmem + 1;
+  if(low_mp < (-maxmem - 1)) low_mp = -maxmem - 1;
 
   /* benchmarking information */
   if(benchmark) {
