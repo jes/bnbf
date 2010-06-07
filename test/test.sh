@@ -5,7 +5,7 @@
 fails=0
 
 fail() {
-    $file=$1
+    file=$1
     echo "FAIL"
     echo "Expected $file:"
     cat $file
