@@ -221,8 +221,10 @@ void run_program(const char *name) {
   /* undo the adjacency optimisations in case of overflow so that the memory
      addresses reached are what they would be if there was no adjacency
      optimisation */
-  if(high_mp > (maxmem + 1)) high_mp = maxmem + 1;
-  if(low_mp < (-maxmem - 1)) low_mp = -maxmem - 1;
+  if(maxmem) {
+    if(high_mp > (maxmem + 1)) high_mp = maxmem + 1;
+    if(low_mp < (-maxmem - 1)) low_mp = -maxmem - 1;
+  }
 
   /* benchmarking information */
   if(benchmark) {
