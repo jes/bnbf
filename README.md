@@ -54,5 +54,5 @@ advantage to running with `--wrap`.
 
 If you find a bug or just want to contact me for any reason, send an email to  
   James Stanley <james@incoherency.co.uk>  
-or find me on IRC as the user `jamesstanley` on irc.`freenode.net`. I am
+or find me on IRC as the user `jamesstanley` on `irc.freenode.net`. I am
 usually in the channel `#maximilian`, so you'll probably find me in there.
