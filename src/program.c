@@ -35,7 +35,7 @@ static Inst *new_inst(char type, Inst **program, Inst *last) {
   Inst *i;
 
   i = malloc(sizeof(Inst));
-  
+
   if(*program) last->next = i;
   else *program = i;
 
@@ -89,6 +89,7 @@ void run_program(const char *name) {
         inst = new_inst(c, &program, inst);
         push(inst);
         break;
+
       case ELOOP:/* loop exit, sort out loop addresses */
         inst = new_inst(c, &program, inst);
 
@@ -104,20 +105,25 @@ void run_program(const char *name) {
         i->u.loop = inst;
         inst->u.loop = i;
         break;
+
       case ADD: case SUB:/* addition/subtraction, adjust amount of adds */
-        if(inst && inst->type == c) inst->u.amount += (c == ADD ? 1 : -1);
-        else {
+        if(inst && inst->type == c && inst->u.amount < INT_MAX) {
+          inst->u.amount++;
+        } else {
           inst = new_inst(c, &program, inst);
-          inst->u.amount = (c == ADD ? 1 : -1);
+          inst->u.amount = 1;
         }
         break;
+
       case LEFT: case RIGHT:/* inc/dec pointer, adjust amount of moves */
-        if(inst && inst->type == c) inst->u.amount += (c == RIGHT ? 1 : -1);
-        else {
+        if(inst && inst->type == c && inst->u.amount < INT_MAX) {
+          inst->u.amount++;
+        } else {
           inst = new_inst(c, &program, inst);
-          inst->u.amount = (c == RIGHT ? 1 : -1);;
+          inst->u.amount = 1;
         }
         break;
+
       default:
         inst = new_inst(c, &program, inst);
         break;
@@ -139,7 +145,7 @@ void run_program(const char *name) {
 
   /* add the end-program instruction */
   inst->next = malloc(sizeof(Inst));
-  inst->next->type = '!';
+  inst->next->type = KILL;
   inst->next->next = NULL;
 
   /* get some memory */
@@ -150,37 +156,59 @@ void run_program(const char *name) {
   program_name = name;
 
   inst = program;
-  while(inst->type != '!' && !stop_program) {
+  while(!stop_program) {
     /* carry out instruction */
     switch(inst->type) {
-      case ADD: case SUB:
+      case ADD:
         add(mem, inst->u.amount);
         break;
-      case LEFT: case RIGHT:
-        mem->mp += inst->u.amount;
-        if(mem->mp > high_mp) high_mp = mem->mp;
+
+      case SUB:
+        add(mem, -inst->u.amount);
+        break;
+
+      case LEFT:
+        mem->mp -= inst->u.amount;
         if(mem->mp < low_mp) low_mp = mem->mp;
         break;
+
+      case RIGHT:
+        mem->mp += inst->u.amount;
+        if(mem->mp > high_mp) high_mp = mem->mp;
+        break;
+
       case INPUT:
         input(mem);
         break;
+
       case OUTPUT:
         output(mem);
         break;
+
       case SLOOP:
         if(is_zero(mem)) inst = inst->u.loop;
         break;
+
       case ELOOP:
         if(!is_zero(mem)) inst = inst->u.loop;
+        break;
+
+      case KILL:
+        stop_program = 1;
         break;
     }
 
     /* count number of instructions that would have been carried out had it not
-       been for the optimising */
+    been for the optimising */
     switch(inst->type) {
       case ADD: case SUB: case LEFT: case RIGHT:
-        steps += abs(inst->u.amount);
+        steps += inst->u.amount;
         break;
+
+      case KILL:
+        /* doesn't count as an instruction */
+        break;
+
       default:
         steps++;
         break;

@@ -9,7 +9,7 @@ OBJS=src/bnbf.o src/options.o src/program.o src/memory.o src/bigint.o
 src/bnbf: $(OBJS)
 
 clean:
-	-rm -f src/bnbf $(OBJS) src/*~
+	-rm -f src/bnbf $(OBJS) *~ **/*~
 .PHONY: clean
 
 install:

@@ -7,6 +7,7 @@ James Stanley 2010 */
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <limits.h>
 #include <stdio.h>
 
 #include "config.h"
@@ -32,12 +33,13 @@ void parse_options(int argc, char **argv);
 #define ELOOP  5
 #define INPUT  6
 #define OUTPUT 7
+#define KILL   8
 
 typedef struct Inst {
   char type;/* type of instruction */
   union {
     struct Inst *loop;/* address of corresponding loop entry/exit */
-    long amount;/* number of this instruction to carry out */
+    int amount;/* number of this instruction to carry out */
   } u;
   struct Inst *next;/* next instruction to execute */
 } Inst;
