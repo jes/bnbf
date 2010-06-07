@@ -54,15 +54,15 @@ void run_program(const char *name) {
   Inst *inst = NULL;
   Inst *i;
   int c;
-  int inst_count = 0;
   char *instructions = "+-<>[],.";
   char *p;
   Memory *mem;
 
   /* benchmarking counters */
-  int steps = 0;
-  int high_mp = 0;
-  int low_mp = 0;
+  long inst_count = 0;
+  long steps = 0;
+  long high_mp = 0;
+  long low_mp = 0;
 
   /* Open the program for reading */
   if(strcmp(name, "-") == 0) {
@@ -95,7 +95,7 @@ void run_program(const char *name) {
 
         if(sp <= 0) {
           /* loop exit with no corresponding start */
-          fprintf(stderr, "%s: mismatched loops.\n", name);
+          fprintf(stderr, "%s: mismatched loops (missing start-loop).\n", name);
           free(stack);
           free_program(program);
           return;
@@ -137,7 +137,7 @@ void run_program(const char *name) {
   if(!program) return;
 
   if(sp > 0) {
-    fprintf(stderr, "%s: mismatched loops.\n", name);
+    fprintf(stderr, "%s: mismatched loops (missing %d end-loops).\n", name, sp);
     free(stack);
     free_program(program);
     return;
@@ -219,10 +219,14 @@ void run_program(const char *name) {
 
   /* benchmarking information */
   if(benchmark) {
-    fprintf(stderr, "%s: total program length: %d\n", program_name, inst_count);
-    fprintf(stderr, "%s: execution steps used: %d\n", program_name, steps);
-    fprintf(stderr, "%s: high address visited: %d\n", program_name, high_mp);
-    fprintf(stderr, "%s:  low address visited: %d\n", program_name, low_mp);
+    fprintf(stderr, "%s: total program length: %ld\n", program_name,
+            inst_count);
+    fprintf(stderr, "%s: execution steps used: %ld\n", program_name,
+            steps);
+    fprintf(stderr, "%s: high address visited: %ld\n", program_name,
+            high_mp);
+    fprintf(stderr, "%s:  low address visited: %ld\n", program_name,
+            low_mp);
   }
 
   free_program(program);
