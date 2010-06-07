@@ -2,6 +2,18 @@
 #Automated testing for bnbf
 #James Stanley 2010
 
+fails=0
+
+fail() {
+    $file=$1
+    echo "FAIL"
+    echo "Expected $file:"
+    cat $file
+    echo "Got:"
+    cat real-$file
+    fails=$((fails+1))
+}
+
 for dir in test-*
 do
     cd $dir
@@ -13,20 +25,12 @@ do
     cmp -s real-stderr stderr
     if [ "$?" -ne "0" ]
     then
-        echo "FAIL"
-        echo "Expected stderr:"
-        cat stderr
-        echo "Got:"
-        cat real-stderr
+        fail "stderr"
      else
         cmp -s real-stdout stdout
         if [ "$?" -ne "0" ]
         then
-            echo "FAIL"
-            echo "Expected stdout:"
-            cat stdout
-            echo "Got:"
-            cat real-stdout
+            fail "stdout"
         else
             echo "PASS"
         fi
@@ -36,3 +40,6 @@ do
 
     cd ..
 done
+
+echo "----------------"
+echo "Failures: $fails"
