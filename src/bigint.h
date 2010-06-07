@@ -1,3 +1,10 @@
+/* Santa Zhang wrote the original version of this code
+
+   "I'd release it in public domain. Just do whatever you want to :)
+   But it does not support division, and currently I don't have a plan to
+   implement that, sorry :)"
+*/
+
 #ifndef PRJ_KNUTH_BIGINT_H_
 #define PRJ_KNUTH_BIGINT_H_
 
