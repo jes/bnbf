@@ -3,6 +3,8 @@
 #James Stanley 2010
 
 fails=0
+passes=0
+tests=0
 
 fail() {
     file=$1
@@ -33,6 +35,7 @@ do
             fail "stdout"
         else
             echo "PASS"
+            passes=$((passes+1))
         fi
     fi
 
@@ -42,4 +45,6 @@ do
 done
 
 echo "----------------"
+echo "   Tests: $((passes+fails))"
 echo "Failures: $fails"
+echo "  Passes: $passes"
