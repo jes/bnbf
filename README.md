@@ -46,9 +46,9 @@ is for I/O to be numeric instead of character-based.
 
 If you wish to emulate the byte-array memory of other implementations, you can
 pass the `--wrap` option, which will cause cell values to wrap back to 0 when
-incrementing 255, and to wrap up to 255 when decrementing 0. This is currently
-implemented with the bignum library, however, so there is no performance
-advantage to running with `--wrap`.
+incrementing 255, and to wrap up to 255 when decrementing 0. This is no longer
+implemented with bignum, so there is a fairly significant (roughly 10x)
+performance advantage to using `--wrap` where possible or appropriate.
 
 ## 3. Contact
 

@@ -2,7 +2,9 @@
 .SH NAME
 bnbf \- Bignum brainfuck interpreter with various runtime options
 .SH SYNOPSIS
-\fBbnbf\fP [-bcnpw?V] [-e value] [-m address] [--benchmark] [--char-io] [--eof=value] [--max-mem=address] [--no-negative] [--prompt] [--wrap] [--help] [--usage] [--version] FILE...
+\fBbnbf\fP [-bcnpw?V] [-e value] [-m address] [--benchmark] [--char-io]
+[--eof=value] [--max-mem=address] [--no-negative] [--prompt] [--wrap] [--help]
+[--usage] [--version] FILE...
 .SS Options
 .TP
 \fB-b, --benchmark\fP
@@ -37,6 +39,10 @@ Print program version.
 .SH EXAMPLES
 .TP
 \fBbnbf --char-io --eof=0 --wrap --max-mem=30000 --no-negative\fP
-Will emulate the behaviour of more "normal" brainfuck interpreters by using characters for I/O (instead of the default of numbers), setting cells to 0 when end-of-file is encountered on input, wrapping cells as if they were only one byte (though bignum is still used internally, so there is no performance advantage to using --wrap), and preventing the program from using addresses higher than 30000, or using negative memory addresses.
+Will emulate the behaviour of more "normal" brainfuck interpreters by using
+characters for I/O (instead of the default of numbers), setting cells to 0 when
+end-of-file is encountered on input, and using single-byte cells instead of
+cells. There is roughly a 10x performance advantage in using --wrap where
+possible.
 .SH BUGS
 Report bugs to James Stanley <james@incoherency.co.uk>

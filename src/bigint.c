@@ -141,7 +141,7 @@ void bigint_from_int(bigint* p_bigint, int value) {
   // from now on, only consider the case of value >= 0
 
   if (value < BIGINT_RADIX) {
-    // handle special case, value = 0
+    // handle special case, value can fit in one element of p_data
 
     p_bigint->data_len = 1;
     p_bigint->p_data[0] = value;

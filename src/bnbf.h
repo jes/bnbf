@@ -1,8 +1,8 @@
 /* Header for bnbf
 
-See "COPYING" for license details
+   See "COPYING" for license details
 
-James Stanley 2010 */
+   James Stanley 2010 */
 
 #include <stdlib.h>
 #include <string.h>
@@ -53,13 +53,11 @@ void free_program(Inst *prog);
 /* memory.c */
 typedef struct Memory {
   int mp;/* memory pointer */
-  bigint *pos_mem;/* positive-address memory */
-  bigint *neg_mem;/* negative-address memory */
+  void *pos_mem;/* positive-address memory */
+  void *neg_mem;/* negative-address memory */
   int pos_len;/* length of pos_mem */
   int neg_len;/* length of neg_mem */
 } Memory;
-
-extern bigint zero, ff;
 
 Memory *make_memory(void);
 void add(Memory *mem, int amt);

@@ -218,7 +218,7 @@ void run_program(const char *name) {
     inst = inst->next;
   }
 
-  /* undo the adjacency optimisations in case of overflow so that the memory
+  /* counter the adjacency optimisations in case of overflow so that the memory
      addresses reached are what they would be if there was no adjacency
      optimisation */
   if(maxmem) {

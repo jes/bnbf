@@ -6,8 +6,6 @@
 
 #include "bnbf.h"
 
-bigint zero, ff;
-
 /* Allocates some memory for a brainfuck program */
 Memory *make_memory(void) {
   int i;
@@ -16,13 +14,27 @@ Memory *make_memory(void) {
   mem = malloc(sizeof(Memory));
   mem->mp = 0;
 
-  mem->pos_mem = malloc(INIT_MEM_SIZE * sizeof(bigint));
-  mem->pos_len = INIT_MEM_SIZE;
-  for(i = 0; i < mem->pos_len; i++) bigint_init(mem->pos_mem + i);
+  if(wrap) {
+    /* memory cells are unsigned char */
+    mem->pos_mem = malloc(INIT_MEM_SIZE);
+    mem->pos_len = INIT_MEM_SIZE;
+    memset(mem->pos_mem, 0, INIT_MEM_SIZE);
 
-  mem->neg_mem = malloc(INIT_MEM_SIZE * sizeof(bigint));
-  mem->neg_len = INIT_MEM_SIZE;
-  for(i = 0; i < mem->neg_len; i++) bigint_init(mem->neg_mem + i);
+    mem->neg_mem = malloc(INIT_MEM_SIZE);
+    mem->neg_len = INIT_MEM_SIZE;
+    memset(mem->neg_mem, 0, INIT_MEM_SIZE);
+  } else {
+    /* memory cells are bigint */
+    mem->pos_mem = malloc(INIT_MEM_SIZE * sizeof(bigint));
+    mem->pos_len = INIT_MEM_SIZE;
+
+    /* we have to cast to "bigint *" here for the pointer arithmetic to work */
+    for(i = 0; i < mem->pos_len; i++) bigint_init((bigint *)mem->pos_mem + i);
+
+    mem->neg_mem = malloc(INIT_MEM_SIZE * sizeof(bigint));
+    mem->neg_len = INIT_MEM_SIZE;
+    for(i = 0; i < mem->neg_len; i++) bigint_init((bigint *)mem->neg_mem + i);
+  }
 
   return mem;
 }
@@ -36,20 +48,21 @@ void free_memory(Memory *mem) {
 
 /* Returns a pointer to the current cell of memory in mem. Sorts out the
    growing of memory where necessary */
-static inline bigint *get_cell(Memory *memory) {
+static inline void *get_cell(Memory *memory) {
   int i;
   int *len;
-  bigint **mem;
+  void **mem;
   int mp;
 
   /* positive or negative address? */
   if(memory->mp >= 0) {
     len = &(memory->pos_len);
-    mem = &(memory->pos_mem);
     mp = memory->mp;
+
+    mem = &(memory->pos_mem);
   } else {
     if(noneg) {
-      fprintf(stderr, "%s: memory overflow, perhaps you need to stop using "
+      fprintf(stderr, "%s: negative memory, perhaps you need to stop using "
               "the --no-negative option or fix a memory leak in your "
               "program.\n",
               program_name);
@@ -58,8 +71,9 @@ static inline bigint *get_cell(Memory *memory) {
     }
 
     len = &(memory->neg_len);
-    mem = &(memory->neg_mem);
     mp = -memory->mp;
+
+    mem = &(memory->neg_mem);
   }
 
   /* check that mp is within range */
@@ -73,37 +87,37 @@ static inline bigint *get_cell(Memory *memory) {
 
   /* double the size of memory until we are within range */
   while(mp >= *len) {
+    if(wrap) {
+      *mem = realloc(*mem, *len * 2);
+      memset(*mem + *len, 0, *len);
+    } else {
+      *mem = realloc(*mem, *len * 2 * sizeof(bigint));
+
+      /* the cast is to make the pointer arithmetic happy */
+      for(i = 0; i < *len; i++) bigint_init((bigint *)*mem + *len + i);
+    }
+
     *len *= 2;
-
-    *mem = realloc(*mem, *len * sizeof(bigint));
-
-    for(i = *len / 2; i < *len; i++) bigint_init(*mem + i);
   }
 
-  return *mem + mp;
+  if(wrap) return *mem + mp;
+  else return *(bigint **)mem + mp;
 }
 
 /* Adds the given amount to the current cell of memory */
 void add(Memory *mem, int amt) {
-  bigint *cell;
+  void *cell;
 
   if(!(cell = get_cell(mem))) return;
 
-  bigint_add_by_int(cell, amt);
-
-  /* pretend we have 8-bit cells */
-  if(wrap) {
-    while(bigint_compare(cell, &zero) < 0)
-      bigint_add_by_int(cell, 0x100);
-
-    while(bigint_compare(cell, &ff) > 0)
-      bigint_add_by_int(cell, -0x100);
-  }
+  if(wrap) *(unsigned char *)cell += amt;
+  else bigint_add_by_int(cell, amt);
 }
 
 /* Read input to the current cell */
 void input(Memory *mem) {
-  bigint *cell;
+  void *cell;
+  bigint input;
   int c;
   char buf[1024];
   char *p;
@@ -116,9 +130,15 @@ void input(Memory *mem) {
     c = fgetc(stdin);
 
     if(c == EOF) goto handle_eof;
-    else bigint_from_int(cell, c);
+    else {
+      if(wrap) *(unsigned char *)cell = c;
+      else bigint_from_int(cell, c);
+    }
   } else {
     /* number io */
+    bigint_init(&input);
+
+    /* use bigint for input even if we're reading to wrapping cells */
     do {
       if(prompt) {
         fprintf(stderr, "Input: ");
@@ -127,7 +147,14 @@ void input(Memory *mem) {
 
       if(!(fgets(buf, 1024, stdin))) goto handle_eof;
       if((p = strchr(buf, '\n'))) *p = '\0';
-    } while(bigint_from_string(cell, buf) == -BIGINT_ILLEGAL_PARAM);
+    } while(bigint_from_string(&input, buf) == -BIGINT_ILLEGAL_PARAM);
+
+    if(wrap) {
+      bigint_to_int(&input, &c);
+      *(unsigned char *)cell = c;
+    } else bigint_copy(cell, &input);
+
+    bigint_release(&input);
   }
 
   return;
@@ -140,7 +167,7 @@ void input(Memory *mem) {
 
 /* Write output from the current cell */
 void output(Memory *mem) {
-  bigint *cell;
+  void *cell;
   int c;
   char *buf;
 
@@ -148,25 +175,31 @@ void output(Memory *mem) {
 
   if(chario) {
     /* character io */
-    bigint_to_int(cell, &c);
+    if(wrap) c = *(unsigned char *)cell;
+    else bigint_to_int(cell, &c);
+
     fputc(c, stdout);
   } else {
     /* number io */
-    buf = malloc(bigint_string_length(cell));
+    if(wrap) printf("%d\n", *(unsigned char *)cell);
+    else {
+      buf = malloc(bigint_string_length(cell));
 
-    bigint_to_string(cell, buf);
-    fputs(buf, stdout); fputc('\n', stdout);
+      bigint_to_string(cell, buf);
+      fputs(buf, stdout); fputc('\n', stdout);
 
-    free(buf);
+      free(buf);
+    }
   }
 }
 
 /* Return 1 if the current cell is 0 and 0 otherwise */
 int is_zero(Memory *mem) {
-  bigint *cell;
+  void *cell;
 
   /* memory leak, return 0 even though the program is about to die */
   if(!(cell = get_cell(mem))) return 0;
 
-  return bigint_is_zero(cell);
+  if(wrap) return *(unsigned char *)cell == 0;
+  else return bigint_is_zero(cell);
 }
