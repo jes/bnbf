@@ -59,7 +59,7 @@ void bigint_from_int(bigint* p_bigint, int value);
 // -0.9  -> -1
 //
 // if the double is NaN or Inf, then the bigint will be set to 0, and
-// returned bigint_errno will be '-BIGINT_ILLEGAL_PARAM'
+// returned bigint_errno will be 'BIGINT_ILLEGAL_PARAM'
 // else, then returned bigint_errno will be 'BIGINT_NOERR' (0)
 //
 // example of supported string:

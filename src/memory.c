@@ -147,7 +147,7 @@ void input(Memory *mem) {
 
       if(!(fgets(buf, 1024, stdin))) goto handle_eof;
       if((p = strchr(buf, '\n'))) *p = '\0';
-    } while(bigint_from_string(&input, buf) == -BIGINT_ILLEGAL_PARAM);
+    } while(bigint_from_string(&input, buf) == BIGINT_ILLEGAL_PARAM);
 
     if(wrap) {
       bigint_to_int(&input, &c);

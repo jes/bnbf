@@ -173,7 +173,6 @@ void bigint_from_int(bigint* p_bigint, int value) {
 
   // pack the memory, keep low memory usage
   bigint_pack_memory(p_bigint);
-  
 }
 
 //
@@ -261,7 +260,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
           state = 2;
         } else {
           // not acceptable input
-          return -BIGINT_ILLEGAL_PARAM;
+          return BIGINT_ILLEGAL_PARAM;
         }
         break;
 
@@ -272,7 +271,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
           fixed_begin = index;
           state = 2;
         } else {
-          return -BIGINT_ILLEGAL_PARAM;
+          return BIGINT_ILLEGAL_PARAM;
         }
         break;
 
@@ -287,7 +286,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
           mantissa_begin = index;
           state = 5;
         } else {
-          return -BIGINT_ILLEGAL_PARAM;
+          return BIGINT_ILLEGAL_PARAM;
         }
         break;
 
@@ -297,7 +296,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
           fraction_begin = index;
           state = 4;
         } else {
-          return -BIGINT_ILLEGAL_PARAM;
+          return BIGINT_ILLEGAL_PARAM;
         }
         break;
 
@@ -309,7 +308,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
         } else if (ch == 'E' || ch == 'e') {
           state = 5;
         } else {
-          return -BIGINT_ILLEGAL_PARAM;
+          return BIGINT_ILLEGAL_PARAM;
         }
         break;
 
@@ -321,7 +320,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
         } else if (ch == '+' || ch == '-') {
           state = 6;
         } else {
-          return -BIGINT_ILLEGAL_PARAM;
+          return BIGINT_ILLEGAL_PARAM;
         }
         break;
 
@@ -331,7 +330,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
           mantissa_end = index + 1;
           state = 7;
         } else {
-          return -BIGINT_ILLEGAL_PARAM;
+          return BIGINT_ILLEGAL_PARAM;
         }
         break;
 
@@ -341,16 +340,16 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
           // state is not changed
           mantissa_end = index + 1;
         } else {
-          return -BIGINT_ILLEGAL_PARAM;
+          return BIGINT_ILLEGAL_PARAM;
         }
         break;
     }
 
-    
+
 //    printf("index=%d char=%c state=%d\n", index, ch, state);
 
     index++;
-// 
+//
 //     printf("fixed_begin = %d\n", fixed_begin);
 //     printf("fixed_end = %d\n", fixed_end);
 //     printf("fraction_begin = %d\n", fraction_begin);
@@ -367,7 +366,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
   } else if (state == 7) {
     mantissa_end = index;
   } else {
-    return -BIGINT_ILLEGAL_PARAM;
+    return BIGINT_ILLEGAL_PARAM;
   }
 
   // we are sure that the end of mantissa part is also the end of string
@@ -413,7 +412,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
 
     // index in the str. 'index' is used in p_bigint's p_data
     int pos = 0;
-    
+
     // used to set the digit on a certain position
     int weight = 1;
 
@@ -447,7 +446,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
 
       // the number of digits to be dropped
       int drop = -mantissa_value;
-      
+
       // dropping
       while (drop > 0) {
 
@@ -461,7 +460,7 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
         } else {
           carry = 0;
         }
-        
+
         // drop digits in the lower part
         pos--;
 
@@ -529,10 +528,10 @@ bigint_errno bigint_from_string(bigint* p_bigint, char* str) {
       p_bigint->data_len = index + 1;
       bigint_pack_memory(p_bigint);
     }
-    
+
   }
 
-  return -BIGINT_NOERR;
+  return BIGINT_NOERR;
 }
 
 int bigint_digit_count(bigint* p_bigint) {
