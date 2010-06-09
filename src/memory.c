@@ -149,10 +149,8 @@ void input(Memory *mem) {
       if((p = strchr(buf, '\n'))) *p = '\0';
     } while(bigint_from_string(&input, buf) == BIGINT_ILLEGAL_PARAM);
 
-    if(wrap) {
-      bigint_to_int(&input, &c);
-      *(unsigned char *)cell = c;
-    } else bigint_copy(cell, &input);
+    if(wrap) *(unsigned char *)cell = bigint_to_int(&input);
+    else bigint_copy(cell, &input);
 
     bigint_release(&input);
   }
@@ -168,17 +166,14 @@ void input(Memory *mem) {
 /* Write output from the current cell */
 void output(Memory *mem) {
   void *cell;
-  int c;
   char *buf;
 
   if(!(cell = get_cell(mem))) return;
 
   if(chario) {
     /* character io */
-    if(wrap) c = *(unsigned char *)cell;
-    else bigint_to_int(cell, &c);
-
-    fputc(c, stdout);
+    if(wrap) fputc(*(unsigned char *)cell, stdout);
+    else fputc(bigint_to_int(cell), stdout);
   } else {
     /* number io */
     if(wrap) printf("%d\n", *(unsigned char *)cell);

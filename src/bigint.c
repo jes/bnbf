@@ -651,55 +651,34 @@ void bigint_to_string(bigint* p_bigint, char* str) {
   *str = '\0';
 }
 
-bigint_errno bigint_to_int(bigint* p_bigint, int* p_int) {
-
+int bigint_to_int(bigint* p_bigint) {
   int index;
-
-  // used to test overflow
-  long long overflow_tester = 0;
-
-  if (p_bigint->sign > 0) {
-    for (index = p_bigint->data_len - 1; index >= 0; index--) {
-      overflow_tester *= (long long) BIGINT_RADIX;
-      overflow_tester += (long long) p_bigint->p_data[index];
-      if (overflow_tester >= 2147483648LL)
-        return BIGINT_OVERFLOW;
-    }
-  } else if (p_bigint->sign < 0) {
-    for (index = p_bigint->data_len - 1; index >= 0; index--) {
-      overflow_tester *= (long long) BIGINT_RADIX;
-      overflow_tester += (long long) p_bigint->p_data[index];
-      if (overflow_tester > 2147483648LL)
-        return BIGINT_OVERFLOW;
-    }
-  }
+  int value;
 
   index = p_bigint->data_len - 1;
 
-  *p_int = 0;
+  value = 0;
 
   while (index >= 0) {
-    *p_int *= BIGINT_RADIX;
-    *p_int += p_bigint->p_data[index];
+    value *= BIGINT_RADIX;
+    value += p_bigint->p_data[index];
     index--;
   }
 
   if (p_bigint->sign == -1) {
-    *p_int = -*p_int;
+    value = -value;
   }
 
-  return BIGINT_NOERR;
+  return value;
 }
 
 void bigint_copy(bigint* p_dst, bigint* p_src) {
-
   bigint_assure_memory(p_dst, p_src->data_len);
 
   memcpy(p_dst->p_data, p_src->p_data, sizeof(int) * p_src->data_len);
 
   p_dst->data_len = p_src->data_len;
   p_dst->sign = p_src->sign;
-  
 }
 
 void bigint_change_sign(bigint* p_bigint) {
