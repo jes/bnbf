@@ -162,56 +162,48 @@ void run_program(const char *name) {
     switch(inst->type) {
       case ADD:
         add(mem, inst->u.amount);
+        steps += inst->u.amount;
         break;
 
       case SUB:
         add(mem, -inst->u.amount);
+        steps += inst->u.amount;
         break;
 
       case LEFT:
         mem->mp -= inst->u.amount;
         if(mem->mp < low_mp) low_mp = mem->mp;
+        steps += inst->u.amount;
         break;
 
       case RIGHT:
         mem->mp += inst->u.amount;
         if(mem->mp > high_mp) high_mp = mem->mp;
+        steps += inst->u.amount;
         break;
 
       case INPUT:
         input(mem);
+        steps++;
         break;
 
       case OUTPUT:
         output(mem);
+        steps++;
         break;
 
       case SLOOP:
         if(is_zero(mem)) inst = inst->u.loop;
+        steps++;
         break;
 
       case ELOOP:
         if(!is_zero(mem)) inst = inst->u.loop;
+        steps++;
         break;
 
       case KILL:
         stop_program = 1;
-        break;
-    }
-
-    /* count number of instructions that would have been carried out had it not
-    been for the optimising */
-    switch(inst->type) {
-      case ADD: case SUB: case LEFT: case RIGHT:
-        steps += inst->u.amount;
-        break;
-
-      case KILL:
-        /* doesn't count as an instruction */
-        break;
-
-      default:
-        steps++;
         break;
     }
 
