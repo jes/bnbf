@@ -103,8 +103,8 @@ int bigint_string_length(bigint* p_bigint);
 void bigint_to_string(bigint* p_bigint, char* str);
 
 // convert the bigint into int
-// if overflow, the returned bigint_errno will be '-BIGINT_OVERFLOW'
-// else it will be '-BIGINT_NOERR'
+// if overflow, the returned bigint_errno will be 'BIGINT_OVERFLOW'
+// else it will be 'BIGINT_NOERR'
 bigint_errno bigint_to_int(bigint* p_bigint, int* p_int);
 
 // copy a big int's value into another bigint

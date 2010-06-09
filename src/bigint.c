@@ -569,14 +569,12 @@ int bigint_digit_count(bigint* p_bigint) {
 }
 
 int bigint_string_length(bigint* p_bigint) {
-
   if (bigint_is_negative(p_bigint)) {
     // negative numbers have a leading '-'
     return 1 + bigint_digit_count(p_bigint);
   } else {
     return bigint_digit_count(p_bigint);
   }
-  
 }
 
 void bigint_to_string(bigint* p_bigint, char* str) {
@@ -610,7 +608,7 @@ void bigint_to_string(bigint* p_bigint, char* str) {
     value = p_bigint->p_data[index];
     while (value > 0) {
       first_seg_length++;
-      value /= 10;    
+      value /= 10;
     }
 
     // write the first segment
@@ -665,14 +663,14 @@ bigint_errno bigint_to_int(bigint* p_bigint, int* p_int) {
       overflow_tester *= (long long) BIGINT_RADIX;
       overflow_tester += (long long) p_bigint->p_data[index];
       if (overflow_tester >= 2147483648LL)
-        return -BIGINT_OVERFLOW;
+        return BIGINT_OVERFLOW;
     }
   } else if (p_bigint->sign < 0) {
     for (index = p_bigint->data_len - 1; index >= 0; index--) {
       overflow_tester *= (long long) BIGINT_RADIX;
       overflow_tester += (long long) p_bigint->p_data[index];
       if (overflow_tester > 2147483648LL)
-        return -BIGINT_OVERFLOW;
+        return BIGINT_OVERFLOW;
     }
   }
 
@@ -690,7 +688,7 @@ bigint_errno bigint_to_int(bigint* p_bigint, int* p_int) {
     *p_int = -*p_int;
   }
 
-  return -BIGINT_NOERR;
+  return BIGINT_NOERR;
 }
 
 void bigint_copy(bigint* p_dst, bigint* p_src) {
