@@ -50,6 +50,12 @@ incrementing 255, and to wrap up to 255 when decrementing 0. This is no longer
 implemented with bignum, so there is a fairly significant (roughly 10x)
 performance advantage to using `--wrap` where possible or appropriate.
 
+With `--wrap` enabled, bnbf is currently about 30% slower than the `beef`
+interpreter available from `http://kiyuko.org/software/beef`. I suspect this is
+because there are a lot of places where bnbf tests whether or not the `--wrap`
+option is set, whereas beef does not support bignum cells so has no reason to
+test any options.
+
 ## 3. Contact
 
 If you find a bug or just want to contact me for any reason, send an email to  
