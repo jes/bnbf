@@ -52,9 +52,9 @@ performance advantage to using `--wrap` where possible or appropriate.
 
 With `--wrap` enabled, bnbf is currently about 30% slower than the `beef`
 interpreter available from `http://kiyuko.org/software/beef`. I suspect this is
-because there are a lot of places where bnbf tests whether or not the `--wrap`
-option is set, whereas beef does not support bignum cells so has no reason to
-test any options.
+because there are a lot of places where bnbf tests whetherthe flag for the
+`--wrap` option is set, whereas beef does not support bignum cells. so it knows
+to always use byte-array memory.
 
 ## 3. Contact
 
