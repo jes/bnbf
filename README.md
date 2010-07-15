@@ -3,8 +3,8 @@
 bnbf is a brainfuck interpreter featuring bignum memory cells and many runtime
 options.
 
-There is a git repository at [github](http://github.com/jes/bnbf) which is where
-new development happens.
+There is a git repository at http://github.com/jes/bnbf which is where new
+development happens.
 
   1. Compiling
   2. Usage
