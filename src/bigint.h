@@ -8,6 +8,36 @@
 #ifndef PRJ_KNUTH_BIGINT_H_
 #define PRJ_KNUTH_BIGINT_H_
 
+/* check that one form of bigint has been chosen */
+#ifndef USE_GMP
+#  ifndef NO_GMP
+#    error "See the Makefile and choose either built-in bigint or GMP."
+#  endif
+#else
+#  ifdef NO_GMP
+#    error "See the Makefile and choose only one of built-in bigint and GMP."
+#  endif
+#endif
+
+typedef enum {
+
+  BIGINT_NOERR = 0,
+
+  BIGINT_ILLEGAL_PARAM = 1,
+
+  BIGINT_OVERFLOW = 2,
+
+} bigint_errno;
+
+#ifdef USE_GMP
+#include <gmp.h>
+
+typedef mpz_t bigint;
+#endif
+
+/* built-in bigint requested */
+#ifdef NO_GMP
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,15 +60,45 @@ typedef struct {
 
 } bigint;
 
-typedef enum {
+// get number of digits in a bigint
+int bigint_digit_count(bigint* p_bigint);
 
-  BIGINT_NOERR = 0,
+// changes the sign of the bigint
+void bigint_change_sign(bigint* p_bigint);
 
-  BIGINT_ILLEGAL_PARAM = 1,
+// test if positive, return 1 if yes, and 0 if not
+int bigint_is_positive(bigint* p_bigint);
 
-  BIGINT_OVERFLOW = 2,
+// test if negative, return 1 if yes, and 0 if not
+int bigint_is_negative(bigint* p_bigint);
 
-} bigint_errno;
+// set a bigint to 0
+void bigint_set_zero(bigint* p_bigint);
+
+// set a bigint to 1
+void bigint_set_one(bigint* p_bigint);
+
+// addition, p_dst could be the same with p_scr
+void bigint_add_by(bigint* p_dst, bigint* p_src);
+
+// return -1 if p_bigint1 < p_bigint2
+// return 0 if p_bigint1 == p_bigint2
+// return 1 if p_bigint1 > p_bigint2
+int bigint_compare(bigint* p_bigint1, bigint* p_bigint2);
+
+// return 1 if p_bigint1 == p_bigint2 (value equal)
+int bigint_equal(bigint* p_bigint1, bigint* p_bigint2);
+
+// gets the nth digit in the bigint
+// if nth < 0, then return -1
+// if nth is bigger than the bigint's length, return will always be 0
+int bigint_nth_digit(bigint* p_bigint, int nth);
+
+#ifdef __cplusplus
+};
+#endif
+
+#endif
 
 // initialize a big int, set it to 0
 void bigint_init(bigint* p_bigint);
@@ -46,8 +106,8 @@ void bigint_init(bigint* p_bigint);
 // release a big int, free the raw data, and set it to
 void bigint_release(bigint* p_bigint);
 
-// set the bigint to a int value
-void bigint_from_int(bigint* p_bigint, int value);
+// add by a single int value
+void bigint_add_by_int(bigint* p_dst, int value);
 
 // set the bigint to a double value in text
 // the double value will be rounded towards the nearest int
@@ -92,12 +152,8 @@ void bigint_from_int(bigint* p_bigint, int value);
 //
 bigint_errno bigint_from_string(bigint* p_bigint, char* str);
 
-// get number of digits in a bigint
-int bigint_digit_count(bigint* p_bigint);
-
-// return the minimum length of char array to store the text representation
-// of a bigint
-int bigint_string_length(bigint* p_bigint);
+// set the bigint to a int value
+void bigint_from_int(bigint* p_bigint, int value);
 
 // convert the bigint into string
 void bigint_to_string(bigint* p_bigint, char* str);
@@ -106,48 +162,14 @@ void bigint_to_string(bigint* p_bigint, char* str);
 // if overflow, unlucky
 int bigint_to_int(bigint* p_bigint);
 
+// return the minimum length of char array to store the text representation
+// of a bigint
+int bigint_string_length(bigint* p_bigint);
+
 // copy a big int's value into another bigint
 void bigint_copy(bigint* p_dst, bigint* p_src);
 
-// changes the sign of the bigint
-void bigint_change_sign(bigint* p_bigint);
-
-// test if positive, return 1 if yes, and 0 if not
-int bigint_is_positive(bigint* p_bigint);
-
-// test if negative, return 1 if yes, and 0 if not
-int bigint_is_negative(bigint* p_bigint);
-
 // test if zero. return 1 if yes, and 0 if not
 int bigint_is_zero(bigint* p_bigint);
-
-// set a bigint to 0
-void bigint_set_zero(bigint* p_bigint);
-
-// set a bigint to 1
-void bigint_set_one(bigint* p_bigint);
-
-// addition, p_dst could be the same with p_scr
-void bigint_add_by(bigint* p_dst, bigint* p_src);
-
-// add by a single int value
-void bigint_add_by_int(bigint* p_dst, int value);
-
-// return -1 if p_bigint1 < p_bigint2
-// return 0 if p_bigint1 == p_bigint2
-// return 1 if p_bigint1 > p_bigint2
-int bigint_compare(bigint* p_bigint1, bigint* p_bigint2);
-
-// return 1 if p_bigint1 == p_bigint2 (value equal)
-int bigint_equal(bigint* p_bigint1, bigint* p_bigint2);
-
-// gets the nth digit in the bigint
-// if nth < 0, then return -1
-// if nth is bigger than the bigint's length, return will always be 0
-int bigint_nth_digit(bigint* p_bigint, int nth);
-
-#ifdef __cplusplus
-};
-#endif
 
 #endif

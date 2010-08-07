@@ -12,6 +12,60 @@
 
 #include "bigint.h"
 
+/* GMP bigint requested */
+#ifdef USE_GMP
+
+void bigint_init(bigint *p) {
+  mpz_init(*p);
+}
+
+void bigint_release(bigint *p) {
+  mpz_clear(*p);
+}
+
+void bigint_add_by_int(bigint *p, int value) {
+  if(value > 0) mpz_add_ui(*p, *p, value);
+  else          mpz_sub_ui(*p, *p, -value);
+}
+
+/* TODO: make this handle 6.2e10 style inputs */
+bigint_errno bigint_from_string(bigint *p, char *str) {
+  if(strpbrk(str, " \n\t")) return BIGINT_ILLEGAL_PARAM;
+
+  mpz_set_str(*p, str, 10);
+
+  return BIGINT_NOERR;
+}
+
+void bigint_from_int(bigint *p, int value) {
+  mpz_set_si(*p, value);
+}
+
+void bigint_to_string(bigint *p, char *str) {
+  mpz_get_str(str, 10, *p);
+}
+
+int bigint_to_int(bigint *p) {
+  return mpz_get_si(*p);
+}
+
+int bigint_string_length(bigint *p) {
+  return mpz_sizeinbase(*p, 10) + 2;
+}
+
+void bigint_copy(bigint *dst, bigint *src) {
+  mpz_set(*dst, *src);
+}
+
+int bigint_is_zero(bigint *p) {
+  return mpz_sgn(*p) == 0;
+}
+
+#endif
+
+/* built-in bigint requested */
+#ifdef NO_GMP
+
 #ifndef max
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
@@ -993,3 +1047,5 @@ int bigint_equal(bigint* p_bigint1, bigint* p_bigint2) {
   else
     return bigint_compare(p_bigint1, p_bigint2) == 0;
 }
+
+#endif
