@@ -25,15 +25,15 @@ extern int wrap;
 void parse_options(int argc, char **argv);
 
 /* program.c */
-#define ADD    0
-#define SUB    1
-#define LEFT   2
-#define RIGHT  3
-#define SLOOP  4
-#define ELOOP  5
-#define INPUT  6
-#define OUTPUT 7
-#define KILL   8
+#define ADD    '+'
+#define SUB    '-'
+#define LEFT   '<'
+#define RIGHT  '>'
+#define SLOOP  '['
+#define ELOOP  ']'
+#define INPUT  ','
+#define OUTPUT '.'
+#define KILL   '!'
 
 typedef struct Inst {
   char type;/* type of instruction */
@@ -41,14 +41,12 @@ typedef struct Inst {
     struct Inst *loop;/* address of corresponding loop entry/exit */
     int amount;/* number of this instruction to carry out */
   } u;
-  struct Inst *next;/* next instruction to execute */
 } Inst;
 
 extern const char *program_name;
 extern int stop_program;
 
 void run_program(const char *name);
-void free_program(Inst *prog);
 
 /* memory.c */
 typedef struct Memory {

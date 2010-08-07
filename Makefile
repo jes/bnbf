@@ -1,7 +1,7 @@
 #Makefile for bnbf
 #James Stanley 2010
 
-CFLAGS=-g -Wall -Wextra -O3
+CFLAGS=-g -Wall -Wextra
 LDFLAGS=
 PREFIX?=/usr
 OBJS=src/bnbf.o src/options.o src/program.o src/memory.o src/bigint.o

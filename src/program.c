@@ -28,21 +28,18 @@ static void *pop(void) {
   return p;
 }
 
-/* Allocate and return a new instruction for the given program, setting the
-   program pointer if necessary, and setting the last instruction's next
-   pointer */
-static Inst *new_inst(char type, Inst **program, Inst *last) {
+/* Allocate and return a new instruction for the given program, updating the
+   length */
+static Inst *new_inst(char type, Inst **program, size_t *len) {
   Inst *i;
 
-  i = malloc(sizeof(Inst));
-
-  if(*program) last->next = i;
-  else *program = i;
+  *program = realloc(*program, (*len + 1) * sizeof(Inst));
+  i = *program + *len;
+  (*len)++;
 
   i->type = type;
   i->u.loop = NULL;
   i->u.amount = 0;
-  i->next = NULL;
 
   return i;
 }
@@ -53,10 +50,11 @@ void run_program(const char *name) {
   Inst *program = NULL;
   Inst *inst = NULL;
   Inst *i;
+  size_t len = 0;
   int c;
   char *instructions = "+-<>[],.";
   char *p;
-  Memory *mem;
+  Memory *mem = NULL;
 
   /* benchmarking counters */
   long inst_count = 0;
@@ -77,28 +75,23 @@ void run_program(const char *name) {
 
   /* Read the program in to the instruction list */
   while((c = fgetc(fp)) != EOF) {
-    if(!(p = strchr(instructions, c))) continue;
-
-    /* convert to instruction number */
-    c = p - instructions;
+    if(!strchr(instructions, c)) continue;
 
     inst_count++;
 
     switch(c) {
       case SLOOP:/* loop entry, push address on to stack */
-        inst = new_inst(c, &program, inst);
+        inst = new_inst(c, &program, &len);
         push(inst);
         break;
 
       case ELOOP:/* loop exit, sort out loop addresses */
-        inst = new_inst(c, &program, inst);
+        inst = new_inst(c, &program, &len);
 
         if(sp <= 0) {
           /* loop exit with no corresponding start */
           fprintf(stderr, "%s: mismatched loops (missing start-loop).\n", name);
-          free(stack);
-          free_program(program);
-          return;
+          goto cleanup;
         }
 
         i = pop();
@@ -106,26 +99,18 @@ void run_program(const char *name) {
         inst->u.loop = i;
         break;
 
-      case ADD: case SUB:/* addition/subtraction, adjust amount of adds */
+      case ADD:  case SUB:   /* addition/subtraction, adjust amount of adds */
+      case LEFT: case RIGHT: /* inc/dec pointer, adjust amount of moves     */
         if(inst && inst->type == c && inst->u.amount < INT_MAX) {
           inst->u.amount++;
         } else {
-          inst = new_inst(c, &program, inst);
-          inst->u.amount = 1;
-        }
-        break;
-
-      case LEFT: case RIGHT:/* inc/dec pointer, adjust amount of moves */
-        if(inst && inst->type == c && inst->u.amount < INT_MAX) {
-          inst->u.amount++;
-        } else {
-          inst = new_inst(c, &program, inst);
+          inst = new_inst(c, &program, &len);
           inst->u.amount = 1;
         }
         break;
 
       default:
-        inst = new_inst(c, &program, inst);
+        inst = new_inst(c, &program, &len);
         break;
     }
   }
@@ -139,15 +124,11 @@ void run_program(const char *name) {
   if(sp > 0) {
     fprintf(stderr, "%s: mismatched loops (missing %d end-loop%s).\n", name,
             sp, sp == 1 ? "" : "s");
-    free(stack);
-    free_program(program);
-    return;
+    goto cleanup;
   }
 
   /* add the end-program instruction */
-  inst->next = malloc(sizeof(Inst));
-  inst->next->type = KILL;
-  inst->next->next = NULL;
+  new_inst(KILL, &program, &len);
 
   /* get some memory */
   mem = make_memory();
@@ -207,7 +188,7 @@ void run_program(const char *name) {
         break;
     }
 
-    inst = inst->next;
+    inst++;
   }
 
   /* counter the adjacency optimisations in case of overflow so that the memory
@@ -230,17 +211,8 @@ void run_program(const char *name) {
             low_mp);
   }
 
-  free_program(program);
+cleanup:
+  free(stack);
+  free(program);
   free_memory(mem);
-  /* loop stack is already empty if we got this far, no need to free it */
-}
-
-/* Walk the list freeing each node */
-void free_program(Inst *prog) {
-  Inst *prog_next;
-
-  for(; prog; prog = prog_next) {
-    prog_next = prog->next;
-    free(prog);
-  }
 }
