@@ -9,23 +9,23 @@
 const char *program_name;
 int stop_program;
 
-static void **stack;
+static size_t *stack;
 static int sp = 0;
 
 /* push a pointer on to the stack */
-static void push(void *p) {
-  stack = realloc(stack, sizeof(void *) * ++sp);
-  stack[sp - 1] = p;
+static void push(size_t n) {
+  stack = realloc(stack, sizeof(size_t) * (sp + 1));
+  stack[sp++] = n;
 }
 
 /* pop a pointer off the stack */
-static void *pop(void) {
-  void *p;
+static size_t pop(void) {
+  size_t n;
 
-  p = stack[--sp];
-  stack = realloc(stack, sizeof(void *) * sp);
+  n = stack[--sp];
+  stack = realloc(stack, sizeof(size_t) * sp);
 
-  return p;
+  return n;
 }
 
 /* Allocate and return a new instruction for the given program, updating the
@@ -38,7 +38,7 @@ static Inst *new_inst(char type, Inst **program, size_t *len) {
   (*len)++;
 
   i->type = type;
-  i->u.loop = NULL;
+  i->u.loop = 0;
   i->u.amount = 0;
 
   return i;
@@ -49,11 +49,10 @@ void run_program(const char *name) {
   FILE *fp;
   Inst *program = NULL;
   Inst *inst = NULL;
-  Inst *i;
+  size_t i;
   size_t len = 0;
   int c;
   char *instructions = "+-<>[],.";
-  char *p;
   Memory *mem = NULL;
 
   /* benchmarking counters */
@@ -82,7 +81,7 @@ void run_program(const char *name) {
     switch(c) {
       case SLOOP:/* loop entry, push address on to stack */
         inst = new_inst(c, &program, &len);
-        push(inst);
+        push(len - 1);
         break;
 
       case ELOOP:/* loop exit, sort out loop addresses */
@@ -95,7 +94,7 @@ void run_program(const char *name) {
         }
 
         i = pop();
-        i->u.loop = inst;
+        program[i].u.loop = len - 1;
         inst->u.loop = i;
         break;
 
@@ -174,12 +173,12 @@ void run_program(const char *name) {
         break;
 
       case SLOOP:
-        if(is_zero(mem)) inst = inst->u.loop;
+        if(is_zero(mem)) inst = program + inst->u.loop;
         steps++;
         break;
 
       case ELOOP:
-        if(!is_zero(mem)) inst = inst->u.loop;
+        if(!is_zero(mem)) inst = program + inst->u.loop;
         steps++;
         break;
 
