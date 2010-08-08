@@ -5,15 +5,13 @@
    implement that, sorry :)"
 */
 
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <math.h>
-
 #include "bigint.h"
 
 /* GMP bigint requested */
 #ifdef USE_GMP
+
+#include <stdlib.h>
+#include <string.h>
 
 void bigint_init(bigint *p) {
   mpz_init(*p);
@@ -28,13 +26,67 @@ void bigint_add_by_int(bigint *p, int value) {
   else          mpz_sub_ui(*p, *p, -value);
 }
 
-/* TODO: make this handle 6.2e10 style inputs */
-bigint_errno bigint_from_string(bigint *p, char *str) {
-  if(strpbrk(str, " \n\t")) return BIGINT_ILLEGAL_PARAM;
+bigint_errno bigint_from_string(bigint *b, char *str) {
+  char *s = NULL, *p;
+  char *mantissa;
+  char *start, *end;
+  mpz_t tentoe;
+  int exponent;
+  int neg_m = 0, neg_e = 0;
 
-  mpz_set_str(*p, str, 10);
+  if(strpbrk(str, " \n\t")) goto error;
+
+  if((p = strpbrk(str, "eE"))) {
+    /* crazy mantissa/exponent notation */
+    s = strdup(str);
+    p += s - str;
+    *p = '\0';
+
+    if(*s == '-') neg_m = 1;
+    if(*s == '+') s++;
+    start = strpbrk(s + neg_m, "0123456789");
+    if(!start) goto error;
+
+    end = start + strspn(start, "0123456789");
+    if(end == start) goto error;
+    *end = '\0';
+
+    /* TODO: extract fractional part */
+
+    mantissa = start;
+    if(neg_m) mantissa--;
+
+    if(*(p+1) == '-') neg_e = 1;
+    if(*(p+1) == '+') p++;
+    start = strpbrk(p+1 + neg_e, "0123456789");
+    if(!start) goto error;
+
+    end = start + strspn(start, "0123456789");
+    if(end == start) goto error;
+    *end = '\0';
+
+    mpz_set_str(*b, mantissa, 10);
+
+    exponent = strtol(start, NULL, 10);
+    mpz_init_set_ui(tentoe, 10);
+    mpz_pow_ui(tentoe, tentoe, exponent);
+
+    if(neg_e) {
+      mpz_div(*b, *b, tentoe);
+    } else {
+      mpz_mul(*b, *b, tentoe);
+    }
+
+    mpz_clear(tentoe);
+
+    free(s);
+  } else mpz_set_str(*b, str, 10);
 
   return BIGINT_NOERR;
+
+error:
+  free(s);
+  return BIGINT_ILLEGAL_PARAM;
 }
 
 void bigint_from_int(bigint *p, int value) {
@@ -65,6 +117,11 @@ int bigint_is_zero(bigint *p) {
 
 /* built-in bigint requested */
 #ifdef NO_GMP
+
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <math.h>
 
 #ifndef max
 #define max(a, b) (((a) > (b)) ? (a) : (b))
