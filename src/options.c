@@ -16,17 +16,17 @@ int prompt = 0;
 int wrap = 0;
 
 static struct option long_options[] = {
-  { "benchmark", 0, NULL, 'b' },
-  { "char-io", 0, NULL, 'c' },
-  { "eof", 1, NULL, 'e' },
-  { "help", 0, NULL, 'h' },
-  { "max-mem", 1, NULL, 'm' },
-  { "no-negative", 0, NULL, 'n' },
-  { "prompt", 0, NULL, 'p' },
-  { "usage", 0, NULL, 'U' },
-  { "version", 0, NULL, 'V' },
-  { "wrap", 0, NULL, 'w' },
-  { NULL }
+  { "benchmark",   no_argument,       NULL, 'b' },
+  { "char-io",     no_argument,       NULL, 'c' },
+  { "eof",         required_argument, NULL, 'e' },
+  { "help",        no_argument,       NULL, 'h' },
+  { "max-mem",     required_argument, NULL, 'm' },
+  { "no-negative", no_argument,       NULL, 'n' },
+  { "prompt",      no_argument,       NULL, 'p' },
+  { "usage",       no_argument,       NULL, 'U' },
+  { "version",     no_argument,       NULL, 'V' },
+  { "wrap",        no_argument,       NULL, 'w' },
+  { NULL,          no_argument,       NULL, '\0' }
 };
 
 /* Output for --help */
@@ -78,39 +78,17 @@ void parse_options(int argc, char **argv) {
   while((c = getopt_long(argc, argv, "bce:hm:npVw", long_options,
                          &option_index)) != -1) {
     switch(c) {
-    case 'b':
-      benchmark = 1;
-      break;
-    case 'c':
-      chario = 1;
-      break;
-    case 'e':
-      eof_value = optarg;
-      break;
-    case 'h':
-      help();
-      break;
-    case 'm':
-      maxmem = atoi(optarg);
-      break;
-    case 'n':
-      noneg = 1;
-      break;
-    case 'p':
-      prompt = 1;
-      break;
-    case 'U':
-      usage();
-      break;
-    case 'V':
-      version();
-      break;
-    case 'w':
-      wrap = 1;
-      break;
-    case '?':
-      exit(1);
-      break;
+    case 'b': benchmark = 1;         break;
+    case 'c': chario = 1;            break;
+    case 'e': eof_value = optarg;    break;
+    case 'h': help();                break;
+    case 'm': maxmem = atoi(optarg); break;
+    case 'n': noneg = 1;             break;
+    case 'p': prompt = 1;            break;
+    case 'U': usage();               break;
+    case 'V': version();             break;
+    case 'w': wrap = 1;              break;
+    case '?': exit(1);
     }
   }
 }
