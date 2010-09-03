@@ -47,14 +47,14 @@ is for I/O to be numeric instead of character-based.
 If you wish to emulate the byte-array memory of other implementations, you can
 pass the `--wrap` option, which will cause cell values to wrap back to 0 when
 incrementing 255, and to wrap up to 255 when decrementing 0. This is no longer
-implemented with bignum, so there is a fairly significant (roughly 10x)
+implemented using bignum, so there is a fairly significant (roughly 10x)
 performance advantage to using `--wrap` where possible or appropriate.
 
 With `--wrap` enabled, bnbf is currently about 30% slower than the `beef`
 interpreter available from `http://kiyuko.org/software/beef`. I suspect this is
 because there are a lot of places where bnbf tests whetherthe flag for the
-`--wrap` option is set, whereas beef does not support bignum cells. so it knows
-to always use byte-array memory.
+`--wrap` option is set, whereas beef does not support bignum cells, so it knows
+always to use byte-array memory.
 
 ## 3. Contact
 
